@@ -1,0 +1,57 @@
+# Core Framework
+streamlit==1.29.0
+python-dotenv==1.0.0
+
+# PDF Processing
+PyMuPDF==1.23.8
+pdfplumber==0.10.3
+
+# NLP & Text Processing
+spacy==3.7.2
+en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.0/en_core_web_sm-3.7.0-py3-none-any.whl
+
+# Database
+sqlite3  # Built-in Python module, no pip install needed
+
+# Document Generation
+python-docx==1.1.0
+reportlab==4.0.7
+
+# Data Processing
+pandas==2.1.4
+numpy==1.26.2
+
+# Date/Time Handling
+python-dateutil==2.8.2
+
+# Testing
+pytest==7.4.3
+pytest-cov==4.1.0
+
+# Validation & Quality
+pydantic==2.5.2
+
+# Logging
+loguru==0.7.2
+
+# Type Hints
+typing-extensions==4.9.0
+
+# HTTP Requests (for PDF downloads)
+requests==2.31.0
+urllib3==2.1.0
+
+# Progress Bars
+tqdm==4.66.1
+
+# YAML Config
+PyYAML==6.0.1
+
+# Markdown Rendering (for Streamlit)
+markdown==3.5.1
+
+# Regex Enhanced
+regex==2023.10.3
+
+# Utilities
+click==8.1.7
