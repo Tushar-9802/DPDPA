@@ -1,0 +1,112 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+venv/
+ENV/
+env/
+.venv
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Environment variables
+.env
+.env.local
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# PDF files (large, downloadable)
+*.pdf
+
+# Logs
+*.log
+logs/
+
+# Cache
+*.cache
+.cache/
+data/cache/*
+!data/cache/.gitkeep
+
+# Processed data (generated)
+data/processed/*.db
+data/processed/*.csv
+data/processed/*.json
+data/processed/*.txt
+
+# Raw data (downloadable)
+data/raw/*.pdf
+data/raw/*.zip
+
+# Test coverage
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.pytest_cache/
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+
+# MyPy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Application-specific (not ready yet)
+src/dashboard/app.py
+src/dashboard/pages/*.py
+src/dashboard/components/*.py
+
+# Backup files
+*.backup
+*.bak
+*.old
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Temporary files
+*.tmp
+*.temp
+temp/
+tmp/
