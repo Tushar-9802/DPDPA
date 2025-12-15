@@ -51,6 +51,9 @@ env/
 
 # PDF files (large, downloadable)
 *.pdf
+# Exception: Important reference documents
+!DPDPA_2023_official.pdf
+!DPDP_Rules_2025_English_only.pdf
 
 # Logs
 *.log
