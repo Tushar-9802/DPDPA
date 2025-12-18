@@ -384,7 +384,9 @@ def main():
             obligation_type = 'breach'
         elif rule_num == '8':
             obligation_type = 'retention'
-        elif rule_num in ['9', '10']:
+        elif rule_num == '9':
+            obligation_type = 'notice'
+        elif rule_num == '10':
             obligation_type = 'children'
         elif rule_num == '13':
             obligation_type = 'sdf'
