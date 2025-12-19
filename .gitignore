@@ -94,10 +94,6 @@ dmypy.json
 # Streamlit
 .streamlit/secrets.toml
 
-# Application-specific (not ready yet)
-src/dashboard/app.py
-src/dashboard/pages/*.py
-src/dashboard/components/*.py
 
 # Backup files
 *.backup

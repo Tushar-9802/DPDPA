@@ -3,7 +3,7 @@ Calculates compliance gaps and priority scores
 
 Usage:
     from src.assessment.gap_analyzer import analyze_gaps
-    analysis = analyze_gaps(business_id, applicable_requirement_ids)
+    analysis = analyze_gaps(business_id, applicable_requirement_ids, answers)
 """
 
 import sqlite3
@@ -30,7 +30,7 @@ def calculate_priority_score(requirement: Dict[str, Any], penalty_amount: int) -
     """
     
     # 1. Penalty score (0-100)
-    max_penalty = 25_000_000_000  # ₹250 crore
+    max_penalty = 2_500_000_000  # Rs. 250 crore (FIXED from 25 billion)
     penalty_score = min((penalty_amount / max_penalty) * 100, 100)
     
     # 2. Deadline urgency (0-100)
@@ -66,7 +66,7 @@ def calculate_priority_score(requirement: Dict[str, Any], penalty_amount: int) -
 
 
 def get_completed_requirements(business_id: int) -> List[int]:
-    """Get IDs of completed requirements"""
+    """Get IDs of completed requirements from database"""
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     
@@ -83,13 +83,66 @@ def get_completed_requirements(business_id: int) -> List[int]:
     return completed
 
 
-def analyze_gaps(business_id: int, applicable_requirement_ids: List[int]) -> Dict[str, Any]:
+def infer_completed_requirements(business_id: int, answers: Dict[str, Any]) -> List[int]:
+    """
+    Infer which requirements are completed based on questionnaire answers
+    Used for initial assessment when compliance_status table is empty
+    
+    Args:
+        business_id: Business profile ID
+        answers: Questionnaire answers dictionary
+        
+    Returns:
+        List of requirement IDs that are completed
+    """
+    completed = []
+    
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    
+    # Get extended data
+    extended = answers.get('extended_data', {})
+    
+    # 1. SECURITY (Rule 6) - 9 requirements
+    # Completed if has ALL 4 security measures
+    security_measures = ['encryption', 'access_control', 'logging', 'backups']
+    current_security = extended.get('current_security', answers.get('current_security', []))
+    
+    if all(measure in current_security for measure in security_measures):
+        cursor.execute("SELECT id FROM requirements WHERE rule_number LIKE 'Rule 6%'")
+        completed.extend([row[0] for row in cursor.fetchall()])
+    
+    # 2. BREACH NOTIFICATION (Rule 7) - 14 requirements  
+    has_breach = extended.get('has_breach_plan', answers.get('has_breach_plan', False))
+    if has_breach:
+        cursor.execute("SELECT id FROM requirements WHERE rule_number LIKE 'Rule 7%'")
+        completed.extend([row[0] for row in cursor.fetchall()])
+    
+    # 3. NOTICE (Rule 3) - 6 requirements
+    has_consent = extended.get('has_consent_mechanism', answers.get('has_consent_mechanism', False))
+    if has_consent:
+        cursor.execute("SELECT id FROM requirements WHERE rule_number LIKE 'Rule 3%'")
+        completed.extend([row[0] for row in cursor.fetchall()])
+    
+    # 4. RIGHTS/GRIEVANCE (Rule 14) - 7 requirements
+    has_grievance = extended.get('has_grievance_system', answers.get('has_grievance_system', False))
+    if has_grievance:
+        cursor.execute("SELECT id FROM requirements WHERE rule_number LIKE 'Rule 14%'")
+        completed.extend([row[0] for row in cursor.fetchall()])
+    
+    conn.close()
+    
+    return completed
+
+
+def analyze_gaps(business_id: int, applicable_requirement_ids: List[int], answers: Dict[str, Any] = None) -> Dict[str, Any]:
     """
     Analyze compliance gaps and generate insights
     
     Args:
         business_id: Business profile ID
         applicable_requirement_ids: List of applicable requirement IDs
+        answers: Optional - questionnaire answers to infer completion
         
     Returns:
         Dictionary with gap analysis
@@ -112,7 +165,12 @@ def analyze_gaps(business_id: int, applicable_requirement_ids: List[int]) -> Dic
     cursor = conn.cursor()
     
     # Get completed requirements
-    completed_ids = get_completed_requirements(business_id)
+    if answers:
+        # Infer from questionnaire answers
+        completed_ids = infer_completed_requirements(business_id, answers)
+    else:
+        # Fall back to database table
+        completed_ids = get_completed_requirements(business_id)
     
     # Get all applicable requirements with details
     placeholders = ','.join('?' * len(applicable_requirement_ids))
@@ -242,7 +300,7 @@ if __name__ == "__main__":
     print()
     
     print("Analyzing gaps...")
-    analysis = analyze_gaps(business_id, applicable)
+    analysis = analyze_gaps(business_id, applicable, test_profile)
     print()
     
     print("="*70)
@@ -254,14 +312,14 @@ if __name__ == "__main__":
     print(f"Gaps: {len(analysis['gaps'])}")
     print(f"Compliance Score: {analysis['compliance_score']:.1f}%")
     print()
-    print(f"Max Penalty: ₹{analysis['max_penalty_exposure'] / 10_000_000:,.0f} crore")
-    print(f"Total Exposure: ₹{analysis['total_penalty_exposure'] / 10_000_000:,.0f} crore")
+    print(f"Max Penalty: Rs. {analysis['max_penalty_exposure'] / 10_000_000:,.0f} crore")
+    print(f"Total Exposure: Rs. {analysis['total_penalty_exposure'] / 10_000_000:,.0f} crore")
     print()
     
     print("TOP 10 PRIORITY REQUIREMENTS:")
     for i, req in enumerate(analysis['priority_requirements'][:10], 1):
         penalty_cr = req['penalty_amount'] / 10_000_000
-        print(f"{i:2d}. {req['rule_number']:20s} [₹{penalty_cr:>6.0f}cr] [Priority: {req['priority_score']:>5.1f}]")
+        print(f"{i:2d}. {req['rule_number']:20s} [Rs. {penalty_cr:>6.0f}cr] [Priority: {req['priority_score']:>5.1f}]")
     print()
     
     print("BY OBLIGATION TYPE:")
@@ -270,5 +328,5 @@ if __name__ == "__main__":
     print()
     
     print("="*70)
-    print("✓ Gap analyzer working correctly")
+    print("Gap analyzer working correctly")
     print("="*70)
