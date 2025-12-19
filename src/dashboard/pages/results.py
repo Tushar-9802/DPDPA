@@ -8,6 +8,7 @@ import sys
 from pathlib import Path
 import pandas as pd
 from datetime import datetime
+import plotly.graph_objects as go
 
 # Add project root
 project_root = Path(__file__).parent.parent.parent
@@ -116,42 +117,190 @@ def show():
             **Action required: IMMEDIATELY cease these activities!**
             """)
     
-    # Requirements breakdown
+    # Requirements breakdown with visualizations
     st.subheader("Requirements Breakdown")
     
-    col1, col2 = st.columns([1, 2])
+    col1, col2 = st.columns([1, 1])
     
     with col1:
-        # Summary table
-        breakdown_data = []
-        for oblig_type, count in sorted(
-            analysis['by_type'].items(), 
-            key=lambda x: x[1], 
-            reverse=True
-        ):
-            breakdown_data.append({
-                'Type': oblig_type.title(),
-                'Count': count
-            })
+        # Pie chart of requirements by type
+        colors = ['#667eea', '#764ba2', '#f093fb', '#4facfe', '#00f2fe', '#43e97b']
         
-        df_breakdown = pd.DataFrame(breakdown_data)
-        st.dataframe(df_breakdown, use_container_width=True, hide_index=True)
+        fig_pie = go.Figure(data=[go.Pie(
+            labels=[t.title() for t in analysis['by_type'].keys()],
+            values=list(analysis['by_type'].values()),
+            hole=0.4,
+            marker=dict(colors=colors),
+            textinfo='label+percent',
+            textfont=dict(family='Arial', size=11)
+        )])
+        
+        fig_pie.update_layout(
+            title=dict(
+                text="Requirements Distribution",
+                font=dict(family='Arial', size=16, color='#262730')
+            ),
+            showlegend=True,
+            legend=dict(
+                orientation="v",
+                font=dict(family='Arial', size=10)
+            ),
+            height=350,
+            margin=dict(l=20, r=20, t=50, b=20),
+            font=dict(family='Arial')
+        )
+        
+        st.plotly_chart(fig_pie, use_container_width=True)
     
     with col2:
-        st.markdown(f"""
-        **Total Applicable Requirements:** {analysis['total_requirements']}
+        # Compliance progress gauge
+        score = analysis['compliance_score']
         
-        **Compliance Status:**
-        - Completed: {analysis['completed']}
-        - Pending: {len(analysis['gaps'])}
+        fig_gauge = go.Figure(go.Indicator(
+            mode="gauge+number",
+            value=score,
+            domain={'x': [0, 1], 'y': [0, 1]},
+            title={'text': "Compliance Score", 'font': {'family': 'Arial', 'size': 18}},
+            number={'suffix': "%", 'font': {'size': 40}},
+            gauge={
+                'axis': {'range': [None, 100], 'tickfont': {'family': 'Arial'}},
+                'bar': {'color': "#667eea"},
+                'bgcolor': "white",
+                'borderwidth': 2,
+                'bordercolor': "#ddd",
+                'steps': [
+                    {'range': [0, 33], 'color': '#ffebee'},
+                    {'range': [33, 66], 'color': '#fff9c4'},
+                    {'range': [66, 100], 'color': '#e8f5e9'}
+                ],
+                'threshold': {
+                    'line': {'color': "#43e97b", 'width': 4},
+                    'thickness': 0.75,
+                    'value': 100
+                }
+            }
+        ))
         
-        **Key Areas:**
-        - Security: {analysis['by_type'].get('security', 0)} requirements
-        - Breach Notification: {analysis['by_type'].get('breach', 0)} requirements
-        - Children's Data: {analysis['by_type'].get('children', 0)} requirements
-        - Notice: {analysis['by_type'].get('notice', 0)} requirements
-        - Rights: {analysis['by_type'].get('rights', 0)} requirements
-        """)
+        fig_gauge.update_layout(
+            height=350,
+            margin=dict(l=20, r=20, t=50, b=20),
+            font={'family': 'Arial', 'size': 14}
+        )
+        
+        st.plotly_chart(fig_gauge, use_container_width=True)
+    
+    # Statistics summary
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.metric(
+            "Total Requirements",
+            analysis['total_requirements'],
+            help="Total applicable requirements for your business"
+        )
+    
+    with col2:
+        st.metric(
+            "Completed",
+            analysis['completed'],
+            delta=f"{analysis['compliance_score']:.1f}%",
+            delta_color="normal"
+        )
+    
+    with col3:
+        st.metric(
+            "Pending",
+            len(analysis['gaps']),
+            delta=f"-{100-analysis['compliance_score']:.1f}%",
+            delta_color="inverse"
+        )
+    
+    st.markdown("---")
+    
+    # Penalty exposure bar chart
+    st.subheader("Penalty Exposure Analysis")
+    
+    # Create penalty breakdown
+    penalty_breakdown = {}
+    for req in analysis['gaps']:
+        penalty_cat = req.get('penalty_category', 'Unknown')
+        penalty_amt = req.get('penalty_amount', 0)
+        oblig_type = req.get('obligation_type', 'general')
+        
+        if oblig_type not in penalty_breakdown:
+            penalty_breakdown[oblig_type] = {
+                'count': 0,
+                'total_exposure': 0,
+                'max_penalty': 0
+            }
+        
+        penalty_breakdown[oblig_type]['count'] += 1
+        penalty_breakdown[oblig_type]['total_exposure'] += penalty_amt
+        penalty_breakdown[oblig_type]['max_penalty'] = max(
+            penalty_breakdown[oblig_type]['max_penalty'], 
+            penalty_amt
+        )
+    
+    if penalty_breakdown:
+        # Create bar chart data
+        categories = []
+        counts = []
+        exposures = []
+        colors_bar = []
+        
+        color_map = {
+            'security': '#667eea',
+            'breach': '#764ba2',
+            'children': '#f093fb',
+            'notice': '#4facfe',
+            'rights': '#00f2fe',
+            'retention': '#43e97b',
+            'sdf': '#f6d365',
+            'general': '#fda085'
+        }
+        
+        for oblig_type, data in sorted(penalty_breakdown.items(), key=lambda x: x[1]['total_exposure'], reverse=True):
+            categories.append(oblig_type.title())
+            counts.append(data['count'])
+            exposures.append(data['total_exposure'] / 10_000_000)  # Convert to crores
+            colors_bar.append(color_map.get(oblig_type, '#667eea'))
+        
+        fig_bar = go.Figure()
+        
+        # Add exposure bars
+        fig_bar.add_trace(go.Bar(
+            x=categories,
+            y=exposures,
+            name='Total Exposure (Rs. Cr)',
+            marker=dict(color=colors_bar, line=dict(color='#262730', width=1)),
+            text=[f"Rs. {e:.0f} Cr" for e in exposures],
+            textposition='auto',
+            textfont=dict(family='Arial', size=11),
+            hovertemplate='<b>%{x}</b><br>Exposure: Rs. %{y:.0f} Cr<br><extra></extra>'
+        ))
+        
+        fig_bar.update_layout(
+            title=dict(
+                text="Penalty Exposure by Requirement Type",
+                font=dict(family='Arial', size=16, color='#262730')
+            ),
+            xaxis=dict(
+                title="Requirement Type",
+                tickangle=-45,
+                tickfont=dict(family='Arial', size=11)
+            ),
+            yaxis=dict(
+                title="Total Penalty Exposure (Rs. Crore)",
+                tickfont=dict(family='Arial')
+            ),
+            height=400,
+            margin=dict(l=50, r=50, t=60, b=100),
+            font=dict(family='Arial'),
+            showlegend=False,
+            hovermode='x unified'
+        )
+        
+        st.plotly_chart(fig_bar, use_container_width=True)
     
     st.markdown("---")
     

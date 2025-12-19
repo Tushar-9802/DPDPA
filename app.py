@@ -113,6 +113,10 @@ if st.sidebar.button("View Results", use_container_width=True, type="primary" if
     st.query_params["page"] = "results"
     st.rerun()
 
+if st.sidebar.button("DPDPA Reference", use_container_width=True, type="primary" if current_page == "reference" else "secondary", key="nav_reference"):
+    st.query_params["page"] = "reference"
+    st.rerun()
+
 if st.sidebar.button("About", use_container_width=True, type="primary" if current_page == "about" else "secondary", key="nav_about"):
     st.query_params["page"] = "about"
     st.rerun()
@@ -150,6 +154,9 @@ elif current_page == "assessment":
 elif current_page == "results":
     from src.dashboard.pages import results
     results.show()
+elif current_page == "reference":
+    from src.dashboard.pages import dpdpa_ref
+    dpdpa_ref.show()
 elif current_page == "about":
     from src.dashboard.pages import about
     about.show()
