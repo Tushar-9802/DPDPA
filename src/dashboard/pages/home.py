@@ -99,14 +99,47 @@ def show():
             if selected != "Select an assessment...":
                 # Find the selected profile
                 selected_index = profile_options.index(selected) - 1
-                selected_profile = profiles[selected_index]
+                selected_profile_basic = profiles[selected_index]
                 
-                # Show details
+                # Get FULL profile with extended_data
+                from src.assessment.business_profiler import get_business_profile
+                from src.assessment.requirement_matcher import match_requirements
+                from src.assessment.gap_analyzer import analyze_gaps
+                
+                selected_profile = get_business_profile(selected_profile_basic['id'])
+                
+                # Build answers dict from full profile
+                answers = {
+                    'business_name': selected_profile.get('business_name', 'Unknown'),
+                    'entity_type': selected_profile.get('entity_type', 'other'),
+                    'user_count': selected_profile.get('user_count', 0),
+                    'processes_children_data': selected_profile.get('processes_children_data', False),
+                    'cross_border_transfers': selected_profile.get('cross_border_transfers', False),
+                }
+                
+                # Add extended_data
+                if 'extended_data' in selected_profile and selected_profile['extended_data']:
+                    extended = selected_profile['extended_data']
+                    answers['extended_data'] = extended
+                    answers.update(extended)
+                else:
+                    answers['extended_data'] = {}
+                
+                # Recalculate score
+                try:
+                    applicable_ids = match_requirements(answers)
+                    analysis = analyze_gaps(selected_profile['id'], applicable_ids, answers)
+                    actual_score = analysis['compliance_score']
+                except Exception as e:
+                    # Fallback to stored score if recalculation fails
+                    actual_score = selected_profile.get('assessment_score', 0.0)
+                
+                # Show details with recalculated score
                 col1, col2, col3, col4 = st.columns(4)
                 with col1:
                     st.metric("Users", f"{selected_profile['user_count']:,}")
                 with col2:
-                    st.metric("Compliance", f"{selected_profile['assessment_score']:.1f}%")
+                    st.metric("Compliance", f"{actual_score:.1f}%")
                 with col3:
                     st.metric("Type", selected_profile['entity_type'].title())
                 with col4:

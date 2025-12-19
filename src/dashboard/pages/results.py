@@ -38,9 +38,9 @@ def show():
             if 'extended_data' in profile:
                 answers.update(profile['extended_data'])
             
-            # Re-run analysis
+            # Re-run analysis with answers
             applicable_ids = match_requirements(answers)
-            analysis = analyze_gaps(business_id, applicable_ids)
+            analysis = analyze_gaps(business_id, applicable_ids, answers)
         except Exception as e:
             st.error(f"Error loading assessment: {e}")
             return
