@@ -22,70 +22,212 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS - Arial font, clean professional design
-st.markdown("""
-<style>
-    /* Set Arial font globally */
-    * {
-        font-family: Arial, sans-serif;
-    }
-    
-    /* Main content area */
-    .main {
-        padding: 2rem;
-    }
-    
-    /* Remove Streamlit branding */
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    
-    /* Headers */
-    h1, h2, h3, h4, h5, h6 {
-        font-family: Arial, sans-serif;
-        font-weight: 600;
-    }
-    
-    /* Metric cards */
-    .metric-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        padding: 1.5rem;
-        border-radius: 8px;
-        color: white;
-        margin: 1rem 0;
-    }
-    
-    /* Buttons */
-    .stButton>button {
-        width: 100%;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border: none;
-        padding: 0.75rem 1.5rem;
-        border-radius: 8px;
-        font-weight: 600;
-        font-family: Arial, sans-serif;
-        transition: all 0.3s;
-    }
-    
-    .stButton>button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-    }
-    
-    /* Tables */
-    .dataframe {
-        font-family: Arial, sans-serif;
-    }
-    
-    /* Warning boxes */
-    .stAlert {
-        font-family: Arial, sans-serif;
-    }
-</style>
-""", unsafe_allow_html=True)
+# Initialize dark mode state
+if 'dark_mode' not in st.session_state:
+    st.session_state['dark_mode'] = False
+
+# Custom CSS - Dynamic based on dark mode
+if st.session_state['dark_mode']:
+    # Dark mode colors
+    st.markdown("""
+    <style>
+        /* Dark mode styling */
+        .stApp {
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+        }
+        
+        /* Set Arial font globally */
+        * {
+            font-family: Arial, sans-serif;
+        }
+        
+        /* Main content area */
+        .main {
+            padding: 2rem;
+            background-color: #1a1a1a;
+        }
+        
+        /* Sidebar */
+        [data-testid="stSidebar"] {
+            background-color: #262626;
+        }
+        
+        [data-testid="stSidebar"] * {
+            color: #e0e0e0 !important;
+        }
+        
+        /* Remove Streamlit branding */
+        #MainMenu {visibility: hidden;}
+        footer {visibility: hidden;}
+        
+        /* Headers */
+        h1, h2, h3, h4, h5, h6 {
+            font-family: Arial, sans-serif;
+            font-weight: 600;
+            color: #e0e0e0;
+        }
+        
+        /* Metric cards */
+        [data-testid="stMetricValue"] {
+            color: #e0e0e0;
+        }
+        
+        [data-testid="stMetricLabel"] {
+            color: #b0b0b0;
+        }
+        
+        /* Buttons */
+        .stButton>button {
+            width: 100%;
+            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-family: Arial, sans-serif;
+            transition: all 0.3s;
+        }
+        
+        .stButton>button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(39,174,96,0.4);
+        }
+        
+        /* Input fields */
+        .stTextInput>div>div>input,
+        .stSelectbox>div>div>select,
+        .stNumberInput>div>div>input {
+            background-color: #262626;
+            color: #e0e0e0;
+            border-color: #404040;
+        }
+        
+        /* Dataframes and tables */
+        .dataframe {
+            font-family: Arial, sans-serif;
+            background-color: #262626;
+            color: #e0e0e0;
+        }
+        
+        /* Info/warning/error boxes */
+        .stAlert {
+            font-family: Arial, sans-serif;
+            background-color: #262626;
+            border-color: #404040;
+        }
+        
+        /* Expanders */
+        [data-testid="stExpander"] {
+            background-color: #262626;
+            border-color: #404040;
+        }
+        
+        /* Tabs */
+        .stTabs [data-baseweb="tab-list"] {
+            background-color: #262626;
+        }
+        
+        .stTabs [data-baseweb="tab"] {
+            color: #b0b0b0;
+        }
+        
+        .stTabs [aria-selected="true"] {
+            color: #667eea;
+        }
+        
+        /* Markdown text */
+        .stMarkdown {
+            color: #e0e0e0;
+        }
+        
+        /* Links */
+        a {
+            color: #667eea;
+        }
+        
+        a:hover {
+            color: #764ba2;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+else:
+    # Light mode colors (original)
+    st.markdown("""
+    <style>
+        /* Set Arial font globally */
+        * {
+            font-family: Arial, sans-serif;
+        }
+        
+        /* Main content area */
+        .main {
+            padding: 2rem;
+        }
+        
+        /* Remove Streamlit branding */
+        #MainMenu {visibility: hidden;}
+        footer {visibility: hidden;}
+        
+        /* Headers */
+        h1, h2, h3, h4, h5, h6 {
+            font-family: Arial, sans-serif;
+            font-weight: 600;
+        }
+        
+        /* Metric cards */
+        .metric-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 1.5rem;
+            border-radius: 8px;
+            color: white;
+            margin: 1rem 0;
+        }
+        
+        /* Buttons */
+        .stButton>button {
+            width: 100%;
+            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-family: Arial, sans-serif;
+            transition: all 0.3s;
+        }
+        
+        .stButton>button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(39,174,96,0.3);
+        }
+        
+        /* Tables */
+        .dataframe {
+            font-family: Arial, sans-serif;
+        }
+        
+        /* Warning boxes */
+        .stAlert {
+            font-family: Arial, sans-serif;
+        }
+    </style>
+    """, unsafe_allow_html=True)
 
 # Sidebar navigation
 st.sidebar.title("DPDPA Compliance")
+st.sidebar.markdown("---")
+
+# Dark mode toggle at top of sidebar
+col1, col2 = st.sidebar.columns([3, 1])
+with col1:
+    st.markdown("**Theme:**")
+with col2:
+    if st.button("🌙" if not st.session_state['dark_mode'] else "☀️", key="theme_toggle"):
+        st.session_state['dark_mode'] = not st.session_state['dark_mode']
+        st.rerun()
+
 st.sidebar.markdown("---")
 
 # Get query params to determine page
@@ -155,8 +297,8 @@ elif current_page == "results":
     from src.dashboard.pages import results
     results.show()
 elif current_page == "reference":
-    from src.dashboard.pages import dpdpa_ref
-    dpdpa_ref.show()
+    from src.dashboard.pages import dpdpa_reference
+    dpdpa_reference.show()
 elif current_page == "about":
     from src.dashboard.pages import about
     about.show()

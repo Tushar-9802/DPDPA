@@ -120,6 +120,12 @@ def show():
     # Requirements breakdown with visualizations
     st.subheader("Requirements Breakdown")
     
+    # Check dark mode
+    is_dark = st.session_state.get('dark_mode', False)
+    bg_color = '#1a1a1a' if is_dark else 'white'
+    text_color = '#e0e0e0' if is_dark else '#262730'
+    grid_color = '#404040' if is_dark else '#e0e0e0'
+    
     col1, col2 = st.columns([1, 1])
     
     with col1:
@@ -132,22 +138,24 @@ def show():
             hole=0.4,
             marker=dict(colors=colors),
             textinfo='label+percent',
-            textfont=dict(family='Arial', size=11)
+            textfont=dict(family='Arial', size=11, color=text_color)
         )])
         
         fig_pie.update_layout(
             title=dict(
                 text="Requirements Distribution",
-                font=dict(family='Arial', size=16, color='#262730')
+                font=dict(family='Arial', size=16, color=text_color)
             ),
             showlegend=True,
             legend=dict(
                 orientation="v",
-                font=dict(family='Arial', size=10)
+                font=dict(family='Arial', size=10, color=text_color)
             ),
             height=350,
             margin=dict(l=20, r=20, t=50, b=20),
-            font=dict(family='Arial')
+            font=dict(family='Arial', color=text_color),
+            paper_bgcolor=bg_color,
+            plot_bgcolor=bg_color
         )
         
         st.plotly_chart(fig_pie, use_container_width=True)
@@ -160,18 +168,18 @@ def show():
             mode="gauge+number",
             value=score,
             domain={'x': [0, 1], 'y': [0, 1]},
-            title={'text': "Compliance Score", 'font': {'family': 'Arial', 'size': 18}},
-            number={'suffix': "%", 'font': {'size': 40}},
+            title={'text': "Compliance Score", 'font': {'family': 'Arial', 'size': 18, 'color': text_color}},
+            number={'suffix': "%", 'font': {'size': 40, 'color': text_color}},
             gauge={
-                'axis': {'range': [None, 100], 'tickfont': {'family': 'Arial'}},
+                'axis': {'range': [None, 100], 'tickfont': {'family': 'Arial', 'color': text_color}},
                 'bar': {'color': "#667eea"},
-                'bgcolor': "white",
+                'bgcolor': bg_color,
                 'borderwidth': 2,
-                'bordercolor': "#ddd",
+                'bordercolor': grid_color,
                 'steps': [
-                    {'range': [0, 33], 'color': '#ffebee'},
-                    {'range': [33, 66], 'color': '#fff9c4'},
-                    {'range': [66, 100], 'color': '#e8f5e9'}
+                    {'range': [0, 33], 'color': '#ffebee' if not is_dark else '#4a1a1a'},
+                    {'range': [33, 66], 'color': '#fff9c4' if not is_dark else '#4a4a1a'},
+                    {'range': [66, 100], 'color': '#e8f5e9' if not is_dark else '#1a4a1a'}
                 ],
                 'threshold': {
                     'line': {'color': "#43e97b", 'width': 4},
@@ -184,7 +192,8 @@ def show():
         fig_gauge.update_layout(
             height=350,
             margin=dict(l=20, r=20, t=50, b=20),
-            font={'family': 'Arial', 'size': 14}
+            font={'family': 'Arial', 'size': 14, 'color': text_color},
+            paper_bgcolor=bg_color
         )
         
         st.plotly_chart(fig_gauge, use_container_width=True)
@@ -272,32 +281,42 @@ def show():
             x=categories,
             y=exposures,
             name='Total Exposure (Rs. Cr)',
-            marker=dict(color=colors_bar, line=dict(color='#262730', width=1)),
+            marker=dict(color=colors_bar, line=dict(color=text_color, width=1)),
             text=[f"Rs. {e:.0f} Cr" for e in exposures],
             textposition='auto',
-            textfont=dict(family='Arial', size=11),
+            textfont=dict(family='Arial', size=11, color=text_color),
             hovertemplate='<b>%{x}</b><br>Exposure: Rs. %{y:.0f} Cr<br><extra></extra>'
         ))
         
         fig_bar.update_layout(
             title=dict(
                 text="Penalty Exposure by Requirement Type",
-                font=dict(family='Arial', size=16, color='#262730')
+                font=dict(family='Arial', size=16, color=text_color)
             ),
             xaxis=dict(
-                title="Requirement Type",
+                title=dict(
+                    text="Requirement Type",
+                    font=dict(color=text_color)
+                ),
                 tickangle=-45,
-                tickfont=dict(family='Arial', size=11)
+                tickfont=dict(family='Arial', size=11, color=text_color),
+                gridcolor=grid_color
             ),
             yaxis=dict(
-                title="Total Penalty Exposure (Rs. Crore)",
-                tickfont=dict(family='Arial')
+                title=dict(
+                    text="Total Penalty Exposure (Rs. Crore)",
+                    font=dict(color=text_color)
+                ),
+                tickfont=dict(family='Arial', color=text_color),
+                gridcolor=grid_color
             ),
             height=400,
             margin=dict(l=50, r=50, t=60, b=100),
-            font=dict(family='Arial'),
+            font=dict(family='Arial', color=text_color),
             showlegend=False,
-            hovermode='x unified'
+            hovermode='x unified',
+            paper_bgcolor=bg_color,
+            plot_bgcolor=bg_color
         )
         
         st.plotly_chart(fig_bar, use_container_width=True)
