@@ -1,6 +1,7 @@
 """
 Results Page - DPDPA Compliance Dashboard
 Display assessment results with metrics and downloadable report
+ENHANCED: Dynamic "Next Steps" based on actual gaps
 """
 
 import streamlit as st
@@ -232,9 +233,8 @@ def show():
     # Create penalty breakdown
     penalty_breakdown = {}
     for req in analysis['gaps']:
-        penalty_cat = req.get('penalty_category', 'Unknown')
-        penalty_amt = req.get('penalty_amount', 0)
         oblig_type = req.get('obligation_type', 'general')
+        penalty_amt = req.get('penalty_amount', 0)
         
         if oblig_type not in penalty_breakdown:
             penalty_breakdown[oblig_type] = {
@@ -253,7 +253,6 @@ def show():
     if penalty_breakdown:
         # Create bar chart data
         categories = []
-        counts = []
         exposures = []
         colors_bar = []
         
@@ -270,13 +269,11 @@ def show():
         
         for oblig_type, data in sorted(penalty_breakdown.items(), key=lambda x: x[1]['total_exposure'], reverse=True):
             categories.append(oblig_type.title())
-            counts.append(data['count'])
             exposures.append(data['total_exposure'] / 10_000_000)  # Convert to crores
             colors_bar.append(color_map.get(oblig_type, '#667eea'))
         
         fig_bar = go.Figure()
         
-        # Add exposure bars
         fig_bar.add_trace(go.Bar(
             x=categories,
             y=exposures,
@@ -397,21 +394,255 @@ def show():
     
     st.markdown("---")
     
-    # Next steps
-    st.subheader("Next Steps")
+    # Dynamic Next Steps - Personalized to Actual Gaps
+    st.subheader("Your Personalized Action Plan")
     
-    st.markdown("""
-    1. **Review Priority Requirements** - Focus on high-penalty items first
-    2. **Implement Security Measures** - Rule 6 (Rs. 250 crore penalty)
-    3. **Setup Breach Response** - Rule 7 (Rs. 200 crore penalty, 72-hour timeline)
-    4. **Children's Data Compliance** - Rule 10 (Rs. 200 crore penalty if applicable)
-    5. **Track Progress** - Update compliance status as you implement
+    # Analyze gaps to generate tailored recommendations
+    top_gaps = analysis['priority_requirements'][:5]
     
-    **Need Help?**
-    - Download the Excel report for detailed analysis
-    - Consult a data protection lawyer for legal advice
-    - Monitor MEITY website for updates and guidance
-    """)
+    if not top_gaps:
+        # Perfect or near-perfect compliance
+        st.success("""
+        ### Congratulations! You have excellent compliance.
+        
+        **To Maintain Your Status:**
+        1. Document all your compliance measures for audit purposes
+        2. Schedule regular audits (quarterly recommended)
+        3. Monitor MEITY website for regulatory updates
+        4. Train your team on DPDP requirements
+        5. Update your privacy notices annually
+        
+        **Keep up the great work!**
+        """)
+    else:
+        # Generate personalized steps based on gap types
+        gap_types = {}
+        for gap in top_gaps:
+            gtype = gap['obligation_type']
+            if gtype not in gap_types:
+                gap_types[gtype] = []
+            gap_types[gtype].append(gap)
+        
+        step_num = 1
+        
+        # Security gaps (highest penalty - always prioritize)
+        if 'security' in gap_types:
+            security_gaps = gap_types['security']
+            penalty_total = sum(g['penalty_amount'] for g in security_gaps) / 10_000_000
+            st.error(f"""
+### {step_num}. CRITICAL: Implement Security Safeguards (Rule 6)
+
+**Penalty Exposure:** Rs. {penalty_total:.0f} crore  
+**Missing:** {len(security_gaps)} security requirement(s)
+
+**Required Actions:**
+- Implement data encryption (in transit and at rest)
+- Setup access control mechanisms (role-based permissions)
+- Enable comprehensive logging (retain for 1 year minimum)
+- Implement backup and recovery procedures
+
+**Timeline:** Start immediately - this is your highest priority  
+**Estimated Effort:** 4-8 weeks depending on current infrastructure
+            """)
+            step_num += 1
+        
+        # Breach notification gaps
+        if 'breach' in gap_types:
+            breach_gaps = gap_types['breach']
+            penalty_total = sum(g['penalty_amount'] for g in breach_gaps) / 10_000_000
+            st.warning(f"""
+### {step_num}. HIGH PRIORITY: Setup Breach Response Plan (Rule 7)
+
+**Penalty Exposure:** Rs. {penalty_total:.0f} crore  
+**Missing:** {len(breach_gaps)} breach notification requirement(s)
+
+**Required Actions:**
+- Create documented breach response procedures
+- Setup 72-hour notification process to Data Protection Board
+- Create breach notification templates for Data Principals
+- Designate breach response team with clear roles
+
+**Timeline:** Complete within 2-4 weeks  
+**Estimated Effort:** 2-3 weeks (documentation + testing)
+            """)
+            step_num += 1
+        
+        # Children's data gaps
+        if 'children' in gap_types:
+            children_gaps = gap_types['children']
+            penalty_total = sum(g['penalty_amount'] for g in children_gaps) / 10_000_000
+            st.error(f"""
+### {step_num}. HIGH PRIORITY: Children's Data Protection (Rule 10)
+
+**Penalty Exposure:** Rs. {penalty_total:.0f} crore  
+**Missing:** {len(children_gaps)} children data requirement(s)
+
+**Required Actions:**
+- Implement verifiable parental consent mechanism
+- IMMEDIATELY disable behavioral tracking of children
+- IMMEDIATELY disable targeted advertising to children
+- Add age verification at registration
+
+**Timeline:** Immediate action required - legal compliance critical  
+**Estimated Effort:** 1-2 weeks (urgent implementation)
+            """)
+            step_num += 1
+        
+        # Notice/Consent gaps
+        if 'notice' in gap_types:
+            notice_gaps = gap_types['notice']
+            penalty_total = sum(g['penalty_amount'] for g in notice_gaps) / 10_000_000
+            st.info(f"""
+### {step_num}. IMPORTANT: Update Privacy Notice (Rule 3)
+
+**Penalty Exposure:** Rs. {penalty_total:.0f} crore  
+**Missing:** {len(notice_gaps)} notice requirement(s)
+
+**Required Actions:**
+- Draft compliant privacy notice in clear, plain language
+- Implement consent mechanism (must be as easy to withdraw as to give)
+- Add links to exercise Data Principal rights
+- Publish prominently on website and mobile app
+
+**Timeline:** 2-3 weeks  
+**Estimated Effort:** 1-2 weeks (legal review recommended)
+            """)
+            step_num += 1
+        
+        # Rights/Grievance gaps
+        if 'rights' in gap_types:
+            rights_gaps = gap_types['rights']
+            penalty_total = sum(g['penalty_amount'] for g in rights_gaps) / 10_000_000
+            st.info(f"""
+### {step_num}. IMPORTANT: Data Principal Rights System (Rule 14)
+
+**Penalty Exposure:** Rs. {penalty_total:.0f} crore  
+**Missing:** {len(rights_gaps)} rights requirement(s)
+
+**Required Actions:**
+- Setup grievance redressal system (90-day response timeline)
+- Enable data access, correction, and erasure requests
+- Publish contact information for rights requests
+- Create tracking system for request handling
+
+**Timeline:** 1-2 months  
+**Estimated Effort:** 3-4 weeks (portal setup + testing)
+            """)
+            step_num += 1
+        
+        # Retention gaps
+        if 'retention' in gap_types:
+            retention_gaps = gap_types['retention']
+            penalty_total = sum(g['penalty_amount'] for g in retention_gaps) / 10_000_000
+            st.info(f"""
+### {step_num}. Data Retention Policy (Rule 8)
+
+**Penalty Exposure:** Rs. {penalty_total:.0f} crore  
+**Missing:** {len(retention_gaps)} retention requirement(s)
+
+**Required Actions:**
+- Document data retention schedules per purpose
+- Implement automated data erasure procedures
+- Add 48-hour warning before data deletion
+- Create retention policy documentation
+
+**Timeline:** 1-2 months  
+**Estimated Effort:** 2-3 weeks (policy + automation)
+            """)
+            step_num += 1
+        
+        # SDF gaps (if applicable)
+        if 'sdf' in gap_types:
+            sdf_gaps = gap_types['sdf']
+            penalty_total = sum(g['penalty_amount'] for g in sdf_gaps) / 10_000_000
+            st.warning(f"""
+### {step_num}. SDF Obligations (Rule 13) *(if designated)*
+
+**Penalty Exposure:** Rs. {penalty_total:.0f} crore  
+**Missing:** {len(sdf_gaps)} SDF requirement(s)
+
+**Required Actions:**
+- Conduct annual Data Protection Impact Assessment (DPIA)
+- Appoint Data Protection Officer (DPO) based in India
+- Conduct annual independent audit
+- Perform algorithmic due diligence (if using AI)
+
+**Timeline:** 3-6 months (complex requirements)  
+**Estimated Effort:** Ongoing (annual obligations)
+
+**Note:** SDF designation is pending government notification
+            """)
+            step_num += 1
+        
+        # Generic final steps
+        st.info(f"""
+### {step_num}. Track Your Progress
+
+**Recommended Actions:**
+- Download the Excel report above for detailed implementation roadmap
+- Re-run this assessment as you complete requirements
+- Document all compliance measures for audit trail
+- Set calendar reminders for deadline milestones
+
+**Progress Tracking:**
+- Every 30 days: Review and update implementation status
+- Every 90 days: Re-assess compliance score
+- 6 months before deadline: Final review and gap closure
+        """)
+        step_num += 1
+        
+        st.success(f"""
+### {step_num}. Get Professional Help
+
+**When to Consult Experts:**
+- Legal advisor: For compliance strategy and implementation guidance
+- Compliance consultant: For complex technical requirements
+- Industry peers: Join DPDP compliance communities for support
+
+**Remember:** This tool provides guidance, but professional legal advice is recommended for critical decisions.
+        """)
+    
+    # Deadline-based urgency warning
+    days_left = (datetime(2027, 5, 13) - datetime.now()).days
+    
+    st.markdown("---")
+    
+    if days_left < 180:
+        st.error(f"""
+        ### URGENT: Only {days_left} days until May 13, 2027 deadline!
+        
+        **You are in the final 6 months.** You should be:
+        - Completing final implementations
+        - Conducting internal audits
+        - Training all team members
+        - Finalizing documentation
+        
+        **Prioritize high-penalty gaps (Rules 6, 7, 10) immediately!**
+        """)
+    elif days_left < 365:
+        st.warning(f"""
+        ### {days_left} days remaining until May 13, 2027 deadline
+        
+        **You are in the final 12 months.** You should be:
+        - Actively implementing compliance measures
+        - Completing technical requirements (Rules 6, 7)
+        - Finalizing policies and documentation
+        - Beginning team training
+        
+        **Stay on track - focus on the action plan above!**
+        """)
+    else:
+        st.info(f"""
+        ### {days_left} days until May 13, 2027 deadline
+        
+        **Good timing to start compliance!** You have sufficient time to:
+        - Plan your implementation strategy
+        - Budget for compliance requirements
+        - Build your compliance team
+        - Implement measures systematically
+        
+        **Follow the priority order above for optimal results.**
+        """)
 
 if __name__ == "__main__":
     show()

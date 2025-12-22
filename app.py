@@ -297,8 +297,8 @@ elif current_page == "results":
     from src.dashboard.pages import results
     results.show()
 elif current_page == "reference":
-    from src.dashboard.pages import dpdpa_reference
-    dpdpa_reference.show()
+    from src.dashboard.pages import dpdpa_ref
+    dpdpa_ref.show()
 elif current_page == "about":
     from src.dashboard.pages import about
     about.show()
