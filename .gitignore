@@ -70,7 +70,8 @@ data/processed/*.db
 data/processed/*.csv
 data/processed/*.json
 data/processed/*.txt
-
+data/processed/*.xlsx
+src/data/processed/*.xlsx
 # Raw data (downloadable)
 data/raw/*.pdf
 data/raw/*.zip
