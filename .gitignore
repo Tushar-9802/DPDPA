@@ -44,16 +44,11 @@ env/
 .env
 .env.local
 
-# Database files
+# Database files (generated on first run)
 *.db
+*.db-journal
 *.sqlite
 *.sqlite3
-
-# PDF files (large, downloadable)
-*.pdf
-# Exception: Important reference documents
-!DPDPA_2023_official.pdf
-!DPDP_Rules_2025_English_only.pdf
 
 # Logs
 *.log
@@ -65,16 +60,19 @@ logs/
 data/cache/*
 !data/cache/.gitkeep
 
-# Processed data (generated)
+# Processed data (generated files)
 data/processed/*.db
 data/processed/*.csv
 data/processed/*.json
 data/processed/*.txt
 data/processed/*.xlsx
-src/data/processed/*.xlsx
-# Raw data (downloadable)
+data/processed/assessment_results/
+
+# Raw data PDFs (large files, user should download from MEITY)
 data/raw/*.pdf
-data/raw/*.zip
+# Exception: Keep official reference documents (if you want to commit them)
+!data/raw/DPDPA_2023_official.pdf
+!data/raw/DPDP_Rules_2025_English_only.pdf
 
 # Test coverage
 htmlcov/
@@ -95,7 +93,6 @@ dmypy.json
 # Streamlit
 .streamlit/secrets.toml
 
-
 # Backup files
 *.backup
 *.bak
@@ -110,3 +107,9 @@ Thumbs.db
 *.temp
 temp/
 tmp/
+
+# Verification/debug scripts (optional - remove if you want to commit them)
+verify.py
+verify_final.py
+fix_penalties.py
+demo_changes.txt
