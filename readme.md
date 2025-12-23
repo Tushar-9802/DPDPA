@@ -1,4 +1,3 @@
-
 # DPDPA Compliance Dashboard
 
 **Automated compliance assessment tool for India's Digital Personal Data Protection Act, 2023**
@@ -963,7 +962,7 @@ def analyze_gaps(business_id, applicable_requirements, answers):
   
     for req in applicable_requirements:
         is_complete = infer_completion(req, answers)
-      
+  
         if is_complete:
             completed.append(req)
         else:
@@ -1374,31 +1373,77 @@ This project exists thanks to:
 
 ---
 
-## License
+## License & Commercial Use
 
-MIT License
+### Personal Use: FREE Forever
 
-Copyright (c) 2024 Tushar
+This tool is **completely free** for:
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+* Your own business compliance assessment
+* Learning and educational purposes
+* Academic research
+* Non-profit organizations
+* Contributing improvements to this repository
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+**Download, run locally, modify as needed. No restrictions.**
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+### Commercial Use: License Required
 
-**Note:** The DPDP Act, 2023 and DPDP Rules, 2025 are government publications and are in the public domain in India.
+If you plan to **make money** using this tool, you need a commercial license.
+
+**Examples requiring a license:**
+
+* Law firms using this for client assessments
+* Compliance consultants charging for DPDP gap analysis
+* SaaS platforms offering DPDP compliance checks
+* Software companies white-labeling this tool
+* Any revenue-generating activity using this code
+
+**Why?** This tool represents 200+ hours of development. If you're earning from it, fair compensation is required.
+
+### Commercial License Pricing
+
+| Use Case                                         | Price                            | Terms               |
+| ------------------------------------------------ | -------------------------------- | ------------------- |
+| **Single Organization**                    | Rs. 50,000                       | One-time, perpetual |
+| **Consulting Firm**(up to 10 clients/year) | Rs. 2,00,000/year                | Annual subscription |
+| **White-Label/OEM**                        | Rs. 5,00,000 + 10% revenue share | Perpetual + ongoing |
+| **Enterprise Custom**                      | Negotiable                       | Contact for quote   |
+
+**Benefits of commercial license:**
+
+* Legal right to use for client work
+* Priority support and bug fixes
+* Custom feature development (optional)
+* White-label rights (OEM tier)
+* Indemnification coverage
+
+### Get a Commercial License
+
+**Contact:**
+
+* Email: tusharbrisingr9802@gmail.com
+* LinkedIn: https://www.linkedin.com/in/tushar-jaju/[Your LinkedIn URL
+* GitHub Issues: [https://github.com/Tushar-9802/DPDPA/issues](https://github.com/Tushar-9802/DPDPA/issues) (tag: commercial-inquiry)
+
+**Response time:** 24-48 hours for licensing inquiries.
+
+### License Violations
+
+Unauthorized commercial use will result in:
+
+* Legal notice and cease & desist
+* Claim for damages and profits gained
+* Copyright infringement case under Indian law
+* Public disclosure of violation
+
+**We actively monitor for unauthorized commercial use.**
+
+### Full License
+
+See [LICENSE](LICENSE) file for complete legal terms.
+
+**Summary:** Free for personal use. Pay for commercial use. Simple.
 
 ---
 
