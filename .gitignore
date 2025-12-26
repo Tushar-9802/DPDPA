@@ -67,6 +67,7 @@ data/processed/*.json
 data/processed/*.txt
 data/processed/*.xlsx
 data/processed/assessment_results/
+data/processed/generated_documents/
 
 # Raw data PDFs (large files, user should download from MEITY)
 data/raw/*.pdf
@@ -112,4 +113,5 @@ tmp/
 verify.py
 verify_final.py
 fix_penalties.py
-demo_changes.txt
+demo_changes.txt\
+test_template.py

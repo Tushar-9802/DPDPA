@@ -643,6 +643,186 @@ def show():
         
         **Follow the priority order above for optimal results.**
         """)
+# ============================================================================
+# DOCUMENT GENERATION SECTION
+# ============================================================================
 
+st.markdown("---")
+st.subheader("Generate Required Documents")
+
+st.info("""
+Based on your compliance gaps, generate DPDP-compliant legal document templates.
+
+**IMPORTANT:** Generated documents are templates requiring legal review before deployment.
+Yellow-highlighted sections need manual completion.
+""")
+
+try:
+    from src.document_generator import DocumentGenerator, DocumentGenerationError
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("**Universal Documents (All Businesses)**")
+        
+        doc_configs = {
+            'Privacy Notice (Rule 3)': ('privacy_notice', 'generate_privacy_notice'),
+            'Consent Form (Section 6)': ('consent_form', 'generate_consent_form'),
+            'Grievance Procedure (Rule 14)': ('grievance_procedure', 'generate_grievance_procedure'),
+            'Retention Schedule (Rule 8)': ('retention_schedule', 'generate_retention_schedule')
+        }
+        
+        for label, (file_prefix, method_name) in doc_configs.items():
+            if st.button(label, key=f"btn_{file_prefix}", use_container_width=True):
+                try:
+                    with st.spinner(f"Generating {label}..."):
+                        generator = DocumentGenerator(answers, analysis)
+                        doc = getattr(generator, method_name)()
+                        
+                        filepath = generator.export_to_docx(
+                            doc, 
+                            f"{file_prefix}_{business_id}.docx"
+                        )
+                        
+                        with open(filepath, 'rb') as f:
+                            st.download_button(
+                                f"Download {label}",
+                                data=f,
+                                file_name=f"{file_prefix}_{answers['business_name']}.docx",
+                                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                                key=f"dl_{file_prefix}"
+                            )
+                        
+                        st.success(f"{label} generated. Review yellow-highlighted sections before use.")
+                
+                except DocumentGenerationError as e:
+                    st.error(f"Generation failed: {e}")
+                except Exception as e:
+                    st.error(f"Unexpected error: {e}")
+    
+    with col2:
+        st.markdown("**Pre-Crisis Templates**")
+        
+        if st.button("Breach Notification Templates (Rule 7)", use_container_width=True, key="btn_breach"):
+            try:
+                with st.spinner("Generating breach templates..."):
+                    generator = DocumentGenerator(answers, analysis)
+                    doc_dpb, doc_users = generator.generate_breach_notification_templates()
+                    
+                    path_dpb = generator.export_to_docx(doc_dpb, f"breach_dpb_{business_id}.docx")
+                    path_users = generator.export_to_docx(doc_users, f"breach_users_{business_id}.docx")
+                    
+                    col_a, col_b = st.columns(2)
+                    with col_a:
+                        with open(path_dpb, 'rb') as f:
+                            st.download_button(
+                                "DPB Notification",
+                                data=f,
+                                file_name=f"breach_dpb_{answers['business_name']}.docx",
+                                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                                key="dl_breach_dpb"
+                            )
+                    with col_b:
+                        with open(path_users, 'rb') as f:
+                            st.download_button(
+                                "User Notification",
+                                data=f,
+                                file_name=f"breach_users_{answers['business_name']}.docx",
+                                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                                key="dl_breach_users"
+                            )
+                    
+                    st.success("Breach templates generated. Store with incident response plan.")
+            
+            except Exception as e:
+                st.error(f"Generation failed: {e}")
+        
+        st.markdown("**Conditional Documents**")
+        
+        if answers.get('processes_children_data'):
+            if st.button("Parental Consent Form (Rule 10)", use_container_width=True, key="btn_parental"):
+                try:
+                    with st.spinner("Generating parental consent form..."):
+                        generator = DocumentGenerator(answers, analysis)
+                        doc = generator.generate_parental_consent_form()
+                        
+                        if doc:
+                            filepath = generator.export_to_docx(doc, f"parental_consent_{business_id}.docx")
+                            
+                            with open(filepath, 'rb') as f:
+                                st.download_button(
+                                    "Download Parental Consent Form",
+                                    data=f,
+                                    file_name=f"parental_consent_{answers['business_name']}.docx",
+                                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                                    key="dl_parental"
+                                )
+                            
+                            st.success("Parental consent form generated.")
+                
+                except Exception as e:
+                    st.error(f"Generation failed: {e}")
+        
+        if answers.get('has_processors'):
+            if st.button("Processor Agreement Checklist (Rule 6)", use_container_width=True, key="btn_processor"):
+                st.warning("**Note:** This generates a CHECKLIST, not a full legal agreement.")
+                
+                try:
+                    with st.spinner("Generating processor checklist..."):
+                        generator = DocumentGenerator(answers, analysis)
+                        doc = generator.generate_processor_agreement_checklist()
+                        
+                        if doc:
+                            filepath = generator.export_to_docx(doc, f"processor_checklist_{business_id}.docx")
+                            
+                            with open(filepath, 'rb') as f:
+                                st.download_button(
+                                    "Download Processor Checklist",
+                                    data=f,
+                                    file_name=f"processor_checklist_{answers['business_name']}.docx",
+                                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                                    key="dl_processor"
+                                )
+                            
+                            st.success("Processor agreement checklist generated.")
+                
+                except Exception as e:
+                    st.error(f"Generation failed: {e}")
+    
+    st.markdown("---")
+    
+    # Bulk generation
+    if st.button("Generate All Required Documents (ZIP)", use_container_width=True, type="primary", key="btn_bulk"):
+        try:
+            with st.spinner("Generating all documents..."):
+                generator = DocumentGenerator(answers, analysis)
+                documents = generator.generate_all_required_documents()
+                
+                zip_path = generator.export_all_to_zip(
+                    documents, 
+                    f"DPDP_Documents_{business_id}.zip"
+                )
+                
+                with open(zip_path, 'rb') as f:
+                    st.download_button(
+                        "Download All Documents (ZIP)",
+                        data=f,
+                        file_name=f"DPDP_Documents_{answers['business_name']}.zip",
+                        mime="application/zip",
+                        key="dl_bulk"
+                    )
+                
+                st.success(f"""
+                Generated {len(documents)} documents. Review all yellow-highlighted sections.
+                
+                Have a lawyer review before deployment.
+                """)
+        
+        except Exception as e:
+            st.error(f"Bulk generation failed: {e}")
+            st.exception(e)
+
+except ImportError:
+    st.error("Document generator module not found. Ensure src/document_generator is installed.")
 if __name__ == "__main__":
     show()
