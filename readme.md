@@ -1,33 +1,37 @@
+
 # DPDPA Compliance Dashboard
 
-**Automated compliance assessment tool for India's Digital Personal Data Protection Act, 2023**
+**Automated compliance assessment and document generation tool for India's Digital Personal Data Protection Act, 2023**
 
 ![Python 3.13](https://img.shields.io/badge/python-3.13-blue.svg)
 ![Streamlit](https://img.shields.io/badge/streamlit-1.40.2-red.svg)
-![License](https://img.shields.io/badge/license-MIT-green.svg)
+![License](https://img.shields.io/badge/license-Source--Available-green.svg)
 ![Status](https://img.shields.io/badge/status-production--ready-brightgreen.svg)
 
 ---
 
 ## Overview
 
-India's Digital Personal Data Protection Act, 2023 mandates full compliance by  **May 13, 2027** . Non-compliance carries penalties up to **Rs. 250 crore** per violation. Most Indian startups and SMBs lack the resources to hire expensive law firms (Rs. 5-10 lakhs typical consulting fees) for compliance assessment.
+India's Digital Personal Data Protection Act, 2023 mandates full compliance by **May 13, 2027**. Non-compliance carries penalties up to **Rs. 250 crore** per violation. Most Indian startups and SMBs lack the resources to hire expensive law firms (Rs. 5-10 lakhs typical consulting fees) for compliance assessment and document preparation.
 
-The **DPDPA Compliance Dashboard** democratizes access to compliance assessment by:
+The **DPDPA Compliance Dashboard** democratizes access to compliance by:
 
 * Extracting 47+ requirements directly from official DPDP Rules 2025 and Act 2023
 * Providing instant gap analysis based on your specific business profile
 * Generating prioritized action plans with penalty exposure calculations
+* Auto-generating 7 legal document templates pre-filled with your data
 * Operating entirely offline on your local machine - **zero data leaves your system**
 
 ### What This Dashboard Does
 
 **Immediate Value:**
 
-* 5-minute assessment replacing weeks of legal research
+* 5-minute assessment + instant document generation replacing weeks of legal research and drafting
 * Identifies exactly which of 47 requirements apply to YOUR business type
 * Calculates total penalty exposure (often Rs. 450-5,200 crore for non-compliant businesses)
-* Generates downloadable Excel reports with implementation roadmaps
+* Generates 7 DPDP-compliant document templates (Privacy Notice, Consent Form, Retention Schedule, etc.)
+* Creates downloadable Excel reports with implementation roadmaps
+* Saves Rs. 7-15 lakhs in legal consulting and document drafting fees
 
 **What This Dashboard Does NOT Do:**
 
@@ -46,7 +50,7 @@ The **DPDPA Compliance Dashboard** democratizes access to compliance assessment 
 * All assessments stored only on your local machine
 * Can run completely offline after initial setup
 
-This privacy-first design reflects the core principle of the DPDP Act itself:  **data minimization and purpose limitation** .
+This privacy-first design reflects the core principle of the DPDP Act itself: **data minimization and purpose limitation**.
 
 ---
 
@@ -56,7 +60,7 @@ This privacy-first design reflects the core principle of the DPDP Act itself:  *
 
 * **Operating System:** Windows 10/11, macOS 10.15+, or Linux (Ubuntu 20.04+)
 * **Python:** 3.13 or higher ([Download here](https://www.python.org/downloads/))
-* **Disk Space:** 150 MB minimum
+* **Disk Space:** 200 MB minimum
 * **RAM:** 2 GB minimum
 * **Internet:** Required only for initial package installation
 
@@ -149,8 +153,8 @@ pip install --upgrade pip
 # Install all required packages
 pip install -r requirements.txt
 
-# Verify installation
-pip list
+# Verify installation (including document generation)
+pip list | grep -E "streamlit|pandas|plotly|openpyxl|PyMuPDF|python-docx"
 ```
 
 **Expected packages:**
@@ -160,6 +164,7 @@ pip list
 * plotly==5.24.1
 * openpyxl==3.1.5
 * PyMuPDF==1.24.13
+* python-docx==1.1.0
 
 #### 5. Initialize Database
 
@@ -391,7 +396,7 @@ priority_score = (
 
 * Generated based on YOUR actual gaps (not generic)
 * Conditional steps (only shows what YOU need to fix)
-* Specific action items with checkboxes
+* Specific action items with timelines
 * Timeline estimates (immediate/2-4 weeks/1-2 months)
 * Effort estimates (1-2 weeks/3-4 weeks/ongoing)
 * Penalty exposure per category
@@ -505,6 +510,118 @@ priority_score = (
 
 ---
 
+## Document Generation System
+
+### Automatic Legal Document Creation
+
+Generate DPDP-compliant legal document templates pre-filled with your business information in seconds.
+
+### What Gets Generated
+
+**Universal Documents (All Businesses):**
+
+1. **Privacy Notice (Rule 3)** - 2 pages
+
+   - Data Fiduciary information
+   - Categories of data collected
+   - Purpose of processing
+   - Consent withdrawal mechanism
+   - Data Principal rights
+   - Grievance redressal contact
+2. **Consent Form (Section 6)** - 2 pages
+
+   - Detailed data collection notice
+   - Purpose specification
+   - Retention periods
+   - Withdrawal instructions
+   - Consequences of not providing consent
+3. **Grievance Redressal Procedure (Rule 14)** - 3 pages
+
+   - How to file grievances
+   - Response timelines (90-day mandate)
+   - Investigation process
+   - Escalation procedures
+4. **Data Retention Schedule (Rule 8)** - 2 pages
+
+   - Retention periods by data category
+   - Legal basis for retention
+   - Third Schedule compliance (if applicable)
+   - 48-hour warning mechanism
+   - Erasure procedures
+5. **Breach Notification Templates (Rule 7)** - 7 pages total
+
+   - DPB notification (72-hour deadline)
+   - User notification (clear language)
+   - Pre-filled for crisis preparedness
+
+**Conditional Documents:**
+
+6. **Parental Consent Form (Rule 10)** - 3 pages
+
+   - Only if processing children's data
+   - Verifiable parental consent mechanism
+   - Prohibited activities (tracking, advertising)
+   - Age verification requirements
+7. **Processor Agreement Checklist (Rule 6)** - 2 pages
+
+   - Only if using data processors
+   - Required contractual clauses
+   - Security obligations
+   - Audit rights
+
+### Features
+
+- **Pre-filled with your data:** Business name, address, email, phone automatically inserted
+- **Smart content:** Data types, purposes, retention periods calculated based on your profile
+- **Legal compliance:** All documents include required DPDP Act references
+- **Professional formatting:** Clean Word documents (.docx) ready for legal review
+- **Bulk download:** Get all documents in one ZIP file
+- **Metadata tracking:** Each document includes generation date, version, and document ID
+
+### How It Works
+
+1. Complete your compliance assessment
+2. Navigate to Results page
+3. Scroll to "Generate Required Documents" section
+4. Choose individual documents or download all as ZIP
+5. Review yellow-highlighted sections (require manual input)
+6. Have documents reviewed by legal counsel
+7. Deploy in your business
+
+### Cost Savings
+
+| Document Type       | Law Firm Cost                   | Dashboard Cost  | Time Saved            |
+| ------------------- | ------------------------------- | --------------- | --------------------- |
+| Privacy Notice      | Rs. 15,000-30,000               | Rs. 0           | 2-3 weeks             |
+| Consent Form        | Rs. 10,000-20,000               | Rs. 0           | 1-2 weeks             |
+| Grievance Procedure | Rs. 15,000-25,000               | Rs. 0           | 1-2 weeks             |
+| Retention Schedule  | Rs. 20,000-40,000               | Rs. 0           | 2-4 weeks             |
+| Breach Templates    | Rs. 30,000-50,000               | Rs. 0           | 3-4 weeks             |
+| Parental Consent    | Rs. 25,000-45,000               | Rs. 0           | 2-3 weeks             |
+| **TOTAL**     | **Rs. 1,15,000-2,10,000** | **Rs. 0** | **11-18 weeks** |
+
+### Important Disclaimers
+
+- Generated documents are **TEMPLATES** requiring legal review
+- Yellow-highlighted sections need manual completion
+- Not a substitute for qualified legal counsel
+- Developer assumes no liability for use of templates
+- Professional review recommended before deployment
+
+### Technical Implementation
+
+- Template-based generation using python-docx
+- Smart placeholder replacement (13 placeholders)
+- Table population (retention schedule)
+- Automatic metadata footers
+- Legal disclaimer headers
+- Conditional logic (parental consent, processor checklist)
+- Data type mapping (coded → human-readable)
+- Retention period calculation (Third Schedule + statutory)
+- Legal basis determination per DPDP Act sections
+
+---
+
 ## Use Cases
 
 ### For Startups (Pre-Seed to Series A)
@@ -516,11 +633,12 @@ priority_score = (
 1. Run initial assessment (5 minutes)
 2. Identify critical gaps (usually Rule 6, 7, 10)
 3. Download Excel roadmap
-4. Implement technical requirements in-house (encryption, logging, etc.)
-5. Consult lawyer only for complex items (privacy notice, DPO appointment)
-6. Re-assess every quarter until 100% compliance
+4. Generate all required documents (Privacy Notice, Consent Form, etc.)
+5. Implement technical requirements in-house (encryption, logging, etc.)
+6. Consult lawyer only for complex items and document review
+7. Re-assess every quarter until 100% compliance
 
-**Cost Savings:** Rs. 3-7 lakhs (self-implementation of 70-80% of requirements)
+**Cost Savings:** Rs. 3-7 lakhs (self-implementation) + Rs. 1.15-2.1 lakhs (document generation) = **Rs. 4.15-9.1 lakhs total**
 
 ### For SMBs (Established Businesses, 10-100 employees)
 
@@ -529,40 +647,42 @@ priority_score = (
 **Solution:**
 
 1. Assessment reveals conditional requirements (Third Schedule, processors, cross-border)
-2. Priority scoring focuses on high-penalty items first
-3. Phased implementation over 12-18 months
-4. Vendor contract reviews (Rule 6 security obligations)
-5. Employee training on new processes
+2. Generate all required legal documents instantly
+3. Priority scoring focuses on high-penalty items first
+4. Phased implementation over 12-18 months
+5. Vendor contract reviews (Rule 6 security obligations)
+6. Employee training on new processes
 
-**Cost Savings:** Rs. 5-10 lakhs (reduced consulting hours through self-assessment)
+**Cost Savings:** Rs. 5-10 lakhs (reduced consulting) + Rs. 1.15-2.1 lakhs (documents) = **Rs. 6.15-12.1 lakhs total**
 
 ### For Consultants & Law Firms
 
-**Problem:** Manual compliance assessments take 40-80 hours, prone to human error, difficult to scale.
+**Problem:** Manual compliance assessments take 40-80 hours, document drafting takes 10-20 hours per document, prone to human error, difficult to scale.
 
 **Solution:**
 
 1. Use dashboard for initial client screening
-2. Generate baseline reports in 5 minutes vs 2 weeks
-3. Focus consulting hours on complex implementation, not basic gap analysis
+2. Generate baseline reports and documents in 5 minutes vs 4-6 weeks
+3. Focus consulting hours on complex implementation, not basic gap analysis or document drafting
 4. Scale to 10x more clients with same team size
 5. White-label potential (customize dashboard for client-facing use)
 
-**Value Add:** Rs. 2-5 lakhs per client saved in junior associate hours
+**Value Add:** Rs. 2-5 lakhs per client (junior associate hours) + Rs. 1.15-2.1 lakhs (document drafting) = **Rs. 3.15-7.1 lakhs per client**
 
 ### For In-House Compliance Teams
 
-**Problem:** Manual spreadsheet tracking, outdated checklists, no automated updates.
+**Problem:** Manual spreadsheet tracking, outdated checklists, no automated updates, repetitive document creation.
 
 **Solution:**
 
 1. Quarterly re-assessments track progress
 2. Automated priority recalculation as deadline approaches
 3. Excel exports for board presentations
-4. Historical comparison shows improvement trajectory
-5. Internal audit preparation
+4. Instant document regeneration as business evolves
+5. Historical comparison shows improvement trajectory
+6. Internal audit preparation
 
-**Efficiency Gain:** 20-30 hours per quarter saved on manual reporting
+**Efficiency Gain:** 20-30 hours per quarter saved on manual reporting + 10-15 hours saved on document updates = **30-45 hours per quarter**
 
 ---
 
@@ -587,13 +707,25 @@ priority_score = (
 * Assume no liability for errors, omissions, or outdated information
 * Do not warrant that the tool is error-free or will operate without interruption
 
+### Document Generation Disclaimer
+
+**Generated documents are TEMPLATES ONLY:**
+
+* Require review by qualified data protection lawyer before deployment
+* May not cover all specific requirements of your business
+* Yellow-highlighted sections require manual completion
+* Developer assumes NO LIABILITY for use of generated documents
+* Not a substitute for professional legal document drafting
+* Laws may have changed since template creation
+
 ### Professional Legal Advice Required
 
 **You MUST consult with qualified professionals for:**
 
 * Legal interpretation of the DPDP Act and Rules
 * Compliance strategy tailored to your specific business
-* Drafting of privacy notices, consent forms, and policies
+* Review and customization of generated documents
+* Drafting of complex legal agreements
 * Negotiation of Data Processor agreements
 * Response to Data Protection Board inquiries
 * Representation in enforcement proceedings
@@ -624,7 +756,7 @@ priority_score = (
 * Monitoring MEITY website (https://www.meity.gov.in/) for updates
 * Subscribing to official government notifications
 * Re-assessing compliance if laws change
-* Updating processes to reflect new requirements
+* Updating documents to reflect new requirements
 
 ### Data Accuracy
 
@@ -684,6 +816,7 @@ priority_score = (
 * You are responsible for the accuracy of information you input
 * You will verify all outputs against official sources
 * You will seek professional advice before making compliance decisions
+* You will have all generated documents reviewed by legal counsel before deployment
 * You will not rely solely on this tool for legal compliance
 * You accept all risks associated with use of this tool
 
@@ -716,7 +849,8 @@ priority_score = (
 
 * Assessment results (compliance scores, gap analysis)
 * Historical assessments (for progress tracking)
-* Generated Excel reports (if downloaded)
+* Generated documents (Word files in data/processed/generated_documents/)
+* Excel reports (if downloaded)
 
 ### What Data This Dashboard Does NOT Collect
 
@@ -736,6 +870,13 @@ priority_score = (
 * Not synchronized to any cloud service
 * Not accessible to anyone but you
 
+**Generated Documents:**
+
+* File location: `data/processed/generated_documents/`
+* Stored on YOUR computer only
+* Can be moved/copied as needed
+* Not transmitted anywhere
+
 **No External Transmission:**
 
 * Zero network calls during assessment (except initial package installation)
@@ -747,9 +888,9 @@ priority_score = (
 
 **As the tool's user, you have the right to:**
 
-* Access: View all your stored assessments at any time
+* Access: View all your stored assessments and documents at any time
 * Correction: Edit assessment data if errors occur
-* Erasure: Delete individual assessments or entire database
+* Erasure: Delete individual assessments, documents, or entire database
 * Portability: Export all data to Excel format
 
 **How to exercise your rights:**
@@ -760,6 +901,9 @@ sqlite3 data/processed/dpdpa_compliance.db "SELECT * FROM business_profiles;"
 
 # Delete specific assessment (erasure)
 sqlite3 data/processed/dpdpa_compliance.db "DELETE FROM business_profiles WHERE business_id='XXXX';"
+
+# Delete generated documents
+rm -rf data/processed/generated_documents/
 
 # Delete entire database (complete erasure)
 rm data/processed/dpdpa_compliance.db
@@ -780,7 +924,7 @@ rm data/processed/dpdpa_compliance.db
 **You should implement:**
 
 * Disk encryption on your computer (BitLocker/FileVault)
-* Regular backups of assessment data (if valuable)
+* Regular backups of assessment data and generated documents (if valuable)
 * Access control to your computer (password protection)
 * Antivirus/antimalware software
 
@@ -793,6 +937,7 @@ rm data/processed/dpdpa_compliance.db
 * plotly (visualizations)
 * openpyxl (Excel export)
 * PyMuPDF (PDF parsing)
+* python-docx (document generation)
 
 **These packages may:**
 
@@ -820,6 +965,9 @@ streamlit run app.py --server.enableCORS=false
 # Delete database
 rm data/processed/dpdpa_compliance.db
 
+# Delete generated documents
+rm -rf data/processed/generated_documents/
+
 # Delete downloaded Excel reports (if any)
 rm -rf data/processed/assessment_results/
 
@@ -846,6 +994,7 @@ rm -rf venv/
 * **Visualization:** Plotly 5.24.1
 * **Export:** openpyxl 3.1.5
 * **PDF Parsing:** PyMuPDF 1.24.13
+* **Document Generation:** python-docx 1.1.0
 
 **Architecture Pattern:**
 
@@ -861,6 +1010,11 @@ rm -rf venv/
 └──────────────┬──────────────────────────┘
                │
 ┌──────────────▼──────────────────────────┐
+│  Document Generator (Template Engine)   │
+│  7 Templates | Placeholders | Export    │
+└──────────────┬──────────────────────────┘
+               │
+┌──────────────▼──────────────────────────┐
 │     Database Layer (SQLite)             │
 │  Requirements | Penalties | Profiles    │
 └─────────────────────────────────────────┘
@@ -868,9 +1022,10 @@ rm -rf venv/
 
 ### Database Schema
 
-**9 Tables:**
+**9 Tables (includes document templates metadata):**
 
 1. **requirements** (47 rows)
+
    * requirement_id (PK)
    * rule_number (e.g., "Rule 6(1)(a)")
    * requirement_text (extracted verbatim)
@@ -879,11 +1034,13 @@ rm -rf venv/
    * is_sdf_specific (boolean)
    * implementation_complexity (Low/Medium/High)
 2. **penalties** (6 rows)
+
    * penalty_category_id (PK)
    * category_name (security_breach, breach_notification, etc.)
    * amount_inr (Rs. 10,000 to Rs. 2,50,00,00,000)
    * act_reference (Section 33)
 3. **business_profiles** (grows with usage)
+
    * business_id (PK, UUID)
    * business_name
    * entity_type
@@ -891,32 +1048,38 @@ rm -rf venv/
    * created_at (timestamp)
    * extended_data (JSON blob for 15 answers)
 4. **compliance_status** (junction table)
+
    * status_id (PK)
    * business_id (FK)
    * requirement_id (FK)
    * is_completed (boolean, inferred)
    * completion_date (nullable)
 5. **schedule_references** (Third Schedule thresholds)
+
    * schedule_id (PK)
    * entity_type
    * threshold_users
    * retention_requirements
 6. **assessments** (audit trail)
+
    * assessment_id (PK)
    * business_id (FK)
    * assessment_date
    * compliance_score
    * total_penalty_exposure
 7. **implementation_templates** (future use)
+
    * template_id (PK)
    * requirement_id (FK)
    * template_text (privacy notice templates, etc.)
 8. **audit_logs** (future use)
+
    * log_id (PK)
    * business_id (FK)
-   * action (assessment, export, etc.)
+   * action (assessment, export, document generation)
    * timestamp
 9. **notifications** (future use)
+
    * notification_id (PK)
    * business_id (FK)
    * message
@@ -988,35 +1151,30 @@ def analyze_gaps(business_id, applicable_requirements, answers):
     }
 ```
 
-**Completion Inference:**
+**Document Generation:**
 
 ```python
-def infer_completion(requirement, answers):
-    # Rule 3 (Notice)
-    if requirement['rule_number'].startswith('Rule 3'):
-        return answers['has_consent_mechanism']
+def generate_document(template_name, business_profile):
+    # Load Word template
+    doc = Document(f"templates/{template_name}.docx")
   
-    # Rule 6 (Security) - ALL 4 measures required
-    if requirement['rule_number'].startswith('Rule 6'):
-        required = {'encryption', 'access_control', 'logging', 'backups'}
-        return required.issubset(set(answers['current_security']))
+    # Replace placeholders
+    replacements = {
+        '{{BUSINESS_NAME}}': business_profile['business_name'],
+        '{{ADDRESS}}': business_profile['address'],
+        '{{EMAIL}}': business_profile['email'],
+        '{{DATA_TYPES}}': format_data_types(business_profile['data_types']),
+        '{{RETENTION_PERIOD}}': calculate_retention(business_profile),
+        # ... 8 more placeholders
+    }
   
-    # Rule 7 (Breach)
-    if requirement['rule_number'].startswith('Rule 7'):
-        return answers['has_breach_plan']
+    replace_all_placeholders(doc, replacements)
   
-    # Rule 10 (Children) - reverse logic
-    if requirement['rule_number'].startswith('Rule 10'):
-        if not answers['processes_children_data']:
-            return True  # N/A
-        return not (answers['tracks_behavior'] or answers['targeted_advertising'])
+    # Add metadata footer
+    add_metadata_footer(doc, template_name, datetime.now())
   
-    # Rule 14 (Rights)
-    if requirement['rule_number'].startswith('Rule 14'):
-        return answers['has_grievance_system']
-  
-    # Default: incomplete
-    return False
+    # Export
+    return doc
 ```
 
 ### Performance Considerations
@@ -1030,6 +1188,7 @@ def infer_completion(requirement, answers):
 **Memory Usage:**
 
 * Full database loads into memory (~5 MB)
+* Document templates load on-demand (~2 MB per template)
 * Excel exports use streaming write (no memory spikes)
 * Plotly charts render on client-side (no server memory)
 
@@ -1037,6 +1196,7 @@ def infer_completion(requirement, answers):
 
 * Initial load: <2 seconds
 * Assessment processing: <1 second (47 requirements, ~1000 calculations)
+* Document generation: <3 seconds per document (7 documents in ~20 seconds)
 * Excel export: <3 seconds (5 tabs, 100+ rows)
 
 ---
@@ -1051,6 +1211,7 @@ def infer_completion(requirement, answers):
 * No dependency on external services
 * Free forever
 * Can run offline
+* Generated documents stay local
 
 **Disadvantages:**
 
@@ -1074,6 +1235,7 @@ def infer_completion(requirement, answers):
 * Data stored on Streamlit's servers (less private)
 * Subject to Streamlit's terms of service
 * Resource limits (1 GB RAM, 1 CPU core)
+* Generated documents stored on cloud
 
 **Instructions:**
 
@@ -1084,7 +1246,7 @@ def infer_completion(requirement, answers):
 5. Click "Deploy"
 6. Your dashboard will be live at: `https://share.streamlit.io/yourusername/DPDPA`
 
-**Privacy note:** Assessments stored on Streamlit Cloud (US-based servers). Not recommended for sensitive business data.
+**Privacy note:** Assessments and documents stored on Streamlit Cloud (US-based servers). Not recommended for sensitive business data.
 
 ### Option 3: Self-Hosted Server (Full Control)
 
@@ -1209,15 +1371,20 @@ python -c "import sqlite3; c=sqlite3.connect('data/processed/dpdpa_compliance.db
 # Should print: Requirements: 47
 ```
 
-**5. "Penalties are 10x too high (Rs. 2,500 crore)"**
+**5. "Document generation fails - template not found"**
 
 ```bash
-# Solution: Old penalty bug
-sqlite3 data/processed/dpdpa_compliance.db "UPDATE penalties SET amount_inr = amount_inr / 10"
+# Solution: Templates missing
+# Check if templates exist:
+ls src/document_generator/templates/
 
-# Verify:
-sqlite3 data/processed/dpdpa_compliance.db "SELECT category_name, amount_inr/10000000 as crore FROM penalties ORDER BY amount_inr DESC"
-# Should show: security_breach | 250.0
+# Should show 7 .docx files:
+# privacy_notice.docx, consent_form.docx, grievance_procedure.docx,
+# retention_schedule.docx, breach_notification_dpb.docx,
+# breach_notification_user.docx, parental_consent.docx
+
+# If missing, ensure you have the complete repository
+git pull origin main
 ```
 
 **6. "Excel export fails"**
@@ -1239,6 +1406,17 @@ streamlit cache clear
 streamlit run app.py
 ```
 
+**8. "Document has unreplaced placeholders like {{BUSINESS_NAME}}"**
+
+```bash
+# Solution: Template corruption or missing data
+# Verify business profile has required fields:
+# - business_name, address, email, phone
+
+# Re-run assessment with complete information
+# If issue persists, check template file integrity
+```
+
 ---
 
 ## Contributing
@@ -1254,42 +1432,57 @@ Contributions are welcome! This is an open-source project aimed at helping India
 3. Improve documentation
 4. Add new requirement extraction logic
 5. Enhance UI/UX
-6. Translate to regional languages
+6. Create additional document templates
+7. Translate to regional languages
 
 **Contribution Guidelines:**
 
 1. **Fork the repository**
-   ```bash
+
+```bash
    # On GitHub, click "Fork"
    git clone https://github.com/yourusername/DPDPA.git
    cd DPDPA
-   ```
+```
+
 2. **Create feature branch**
-   ```bash
+
+```bash
    git checkout -b feature/YourFeatureName
-   ```
+```
+
 3. **Make changes**
+
    * Follow PEP 8 style guide
    * Add comments for complex logic
    * Update README if needed
+   * Test document generation if modifying templates
 4. **Test your changes**
-   ```bash
+
+```bash
    # Run full assessment flow
    streamlit run app.py
    # Test with various business profiles
-   ```
+   # Test document generation
+   python test_all_seven_templates.py
+```
+
 5. **Commit with clear messages**
-   ```bash
+
+```bash
    git commit -m "feat: Add SDF obligation checker"
    # Or:
    git commit -m "fix: Correct Third Schedule threshold for gaming"
    # Or:
    git commit -m "docs: Update installation instructions for macOS"
-   ```
+```
+
 6. **Push to your fork**
-   ```bash
+
+```bash
    git push origin feature/YourFeatureName
-   ```
+```
+
 7. **Open Pull Request**
    * Go to original repository
    * Click "New Pull Request"
@@ -1357,13 +1550,14 @@ This project exists thanks to:
 
 * Streamlit team for the excellent web framework
 * Python Software Foundation for Python 3.13
-* pandas, plotly, PyMuPDF, and other open-source library maintainers
+* pandas, plotly, PyMuPDF, python-docx, and other open-source library maintainers
 
 **Inspiration:**
 
 * Indian startup ecosystem's need for accessible compliance tools
 * High cost of legal consulting (Rs. 5-10 lakhs) creating barrier to entry
 * Complexity of 200+ page regulations requiring technical extraction
+* Document drafting fees (Rs. 1-2 lakhs) preventing small businesses from compliance
 
 **Community:**
 
@@ -1403,12 +1597,12 @@ If you plan to **make money** using this tool, you need a commercial license.
 
 ### Commercial License Pricing
 
-| Use Case                                         | Price                            | Terms               |
-| ------------------------------------------------ | -------------------------------- | ------------------- |
-| **Single Organization**                    | Rs. 50,000                       | One-time, perpetual |
-| **Consulting Firm**(up to 10 clients/year) | Rs. 2,00,000/year                | Annual subscription |
-| **White-Label/OEM**                        | Rs. 5,00,000 + 10% revenue share | Perpetual + ongoing |
-| **Enterprise Custom**                      | Negotiable                       | Contact for quote   |
+| Use Case                                          | Price                            | Terms               |
+| ------------------------------------------------- | -------------------------------- | ------------------- |
+| **Single Organization**                     | Rs. 50,000                       | One-time, perpetual |
+| **Consulting Firm** (up to 10 clients/year) | Rs. 2,00,000/year                | Annual subscription |
+| **White-Label/OEM**                         | Rs. 5,00,000 + 10% revenue share | Perpetual + ongoing |
+| **Enterprise Custom**                       | Negotiable                       | Contact for quote   |
 
 **Benefits of commercial license:**
 
@@ -1423,8 +1617,8 @@ If you plan to **make money** using this tool, you need a commercial license.
 **Contact:**
 
 * Email: tusharbrisingr9802@gmail.com
-* LinkedIn: https://www.linkedin.com/in/tushar-jaju/[Your LinkedIn URL
-* GitHub Issues: [https://github.com/Tushar-9802/DPDPA/issues](https://github.com/Tushar-9802/DPDPA/issues) (tag: commercial-inquiry)
+* LinkedIn: https://www.linkedin.com/in/tushar-jaju/
+* GitHub Issues: https://github.com/Tushar-9802/DPDPA/issues (tag: commercial-inquiry)
 
 **Response time:** 24-48 hours for licensing inquiries.
 
@@ -1459,7 +1653,7 @@ https://github.com/Tushar-9802/DPDPA/issues
 https://github.com/Tushar-9802/DPDPA/discussions
 
 **For business inquiries or collaboration:**
-[Your professional email or LinkedIn]
+tusharbrisingr9802@gmail.com
 
 **For legal questions:**
 Please consult a qualified data protection lawyer. The tool developers cannot provide legal advice.
@@ -1472,8 +1666,8 @@ If you use this tool in academic research, business reports, or publications, pl
 
 ```
 DPDPA Compliance Dashboard
-Automated Assessment Tool for India's Digital Personal Data Protection Act, 2023
-Tushar (2024)
+Automated Assessment and Document Generation Tool for India's Digital Personal Data Protection Act, 2023
+Tushar Jaju (2024)
 https://github.com/Tushar-9802/DPDPA
 ```
 
@@ -1499,9 +1693,19 @@ https://github.com/Tushar-9802/DPDPA
 * [X] Plotly charts (pie, gauge, bar)
 * [X] Dark mode toggle
 * [X] DPDP reference page
+* [X] Document generation system (7 DPDP templates)
+* [X] Template-based DOCX creation with placeholder replacement
+* [X] Smart content generation (retention periods, legal basis)
+* [X] Bulk ZIP export for all documents
+* [X] Metadata tracking and version control
 
 ### Planned (v1.1) - Q1 2025
 
+* [ ] Separate Documents page/tab (cleaner UI)
+* [ ] PDF preview before download
+* [ ] Document generation history
+* [ ] Custom template upload
+* [ ] Email delivery of generated documents
 * [ ] Loading spinners during analysis
 * [ ] Better empty states with CTAs
 * [ ] Tooltips on all questions
@@ -1518,11 +1722,10 @@ https://github.com/Tushar-9802/DPDPA
 **If Open Source Route:**
 
 * [ ] AI-powered implementation suggestions
-* [ ] PDF export (in addition to Excel)
 * [ ] Timeline view (Gantt chart for implementation)
 * [ ] Multi-language support (Hindi, Tamil, Bengali)
 * [ ] Requirement details page (full text + examples)
-* [ ] Template library (privacy notices, consent forms)
+* [ ] Multi-format document export (PDF, HTML)
 
 **If Commercial Route:**
 
@@ -1623,6 +1826,19 @@ https://github.com/Tushar-9802/DPDPA
 * [ ] Monitor MEITY notifications for restricted countries (Rule 15)
 * [ ] Ensure adequate safeguards in destination country (Rule 15)
 
+**Document Your Compliance:**
+
+* [ ] Generate Privacy Notice from dashboard
+* [ ] Generate Consent Form from dashboard
+* [ ] Generate Grievance Procedure from dashboard
+* [ ] Generate Retention Schedule from dashboard
+* [ ] Generate Breach Templates (store for emergencies)
+* [ ] Generate Parental Consent (if applicable)
+* [ ] Have all documents reviewed by legal counsel
+* [ ] Deploy documents on website/app
+* [ ] Train team on document usage
+* [ ] Update documents annually
+
 ### Penalty Calculator
 
 Use this formula to estimate your maximum penalty exposure:
@@ -1650,18 +1866,20 @@ Rs. 5,150 Cr - Rs. 250 Cr = Rs. 4,900 Cr risk reduction (95% improvement)
 **18 months before deadline (November 2025):**
 
 * Complete initial assessment
+* Generate all required documents
 * Budget for compliance (Rs. 2-10 lakhs)
 * Hire consultant or assign internal team
 
 **15 months before deadline (February 2026):**
 
 * Implement Rule 6 (security measures) - highest priority
-* Draft privacy notice (Rule 3)
+* Finalize privacy notice with legal review
 * Begin procurement of security tools
 
 **12 months before deadline (May 2026):**
 
 * Implement Rule 7 (breach response plan)
+* Deploy breach notification templates
 * Setup grievance system (Rule 14)
 * Train employees on DPDP requirements
 
@@ -1674,6 +1892,7 @@ Rs. 5,150 Cr - Rs. 250 Cr = Rs. 4,900 Cr risk reduction (95% improvement)
 **6 months before deadline (November 2026):**
 
 * Re-assess compliance score (target: 90%+)
+* Regenerate documents with any updates
 * Fix remaining gaps
 * Document all measures for audit trail
 
@@ -1696,10 +1915,10 @@ Rs. 5,150 Cr - Rs. 250 Cr = Rs. 4,900 Cr risk reduction (95% improvement)
 
 ---
 
-**Last Updated:** December 22, 2024
+**Last Updated:** December 30, 2024
 
-**Version:** 1.0.2 (Production Ready)
+**Version:** 1.0.2-documents-complete (Production Ready)
 
-**Days to Deadline:** 510
+**Days to Deadline:** 499
 
 **Built with care for the Indian startup ecosystem**

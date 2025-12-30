@@ -626,34 +626,57 @@ Penalty: Rs. 50 crore"""
                 paragraph.add_run(full_text)
     
     def _populate_retention_table(self, doc: Document):
-        """Populate retention schedule table"""
+        """Find and populate retention schedule table in template"""
+        # Find table with marker
         retention_table = None
         for table in doc.tables:
             if table.rows and table.rows[0].cells:
-                if '{{RETENTION_TABLE}}' in table.rows[0].cells[0].text:
+                # Check if this table has the marker in row 2
+                if len(table.rows) > 1:
+                    first_cell_text = table.rows[1].cells[0].text.strip()
+                if '{{RETENTION_TABLE}}' in first_cell_text:
                     retention_table = table
                     break
-        
+    
         if not retention_table:
             raise DocumentGenerationError(
-                "Retention schedule template missing {{RETENTION_TABLE}} marker"
-            )
-        
-        # Set headers
-        retention_table.rows[0].cells[0].text = 'Data Category'
-        retention_table.rows[0].cells[1].text = 'Retention Period'
-        retention_table.rows[0].cells[2].text = 'Legal Basis'
-        retention_table.rows[0].cells[3].text = 'Erasure Mechanism'
-        
-        # Populate rows
+            "Retention schedule template missing {{RETENTION_TABLE}} marker in table"
+        )
+    
+        # Clear the marker from row 2, cell 1
+        retention_table.rows[1].cells[0].text = ''
+    
+        # Remove the marker row entirely (we'll add data rows fresh)
+        # Note: Can't delete row easily in python-docx, so we'll just overwrite it
+    
+        # Get data types
         data_types = self.profile.get('data_types', [])
-        for data_type in data_types:
+    
+        if not data_types:
+        # If no data types, add placeholder row
+            row = retention_table.rows[1]
+            row.cells[0].text = '[NO DATA TYPES SPECIFIED]'
+            row.cells[1].text = 'N/A'
+            row.cells[2].text = 'N/A'
+            row.cells[3].text = 'N/A'
+            return
+    
+    # Populate first data type in existing row 2
+        first_type = data_types[0]
+        row = retention_table.rows[1]
+        row.cells[0].text = DATA_TYPE_DISPLAY_NAMES.get(first_type, first_type.title())
+        row.cells[1].text = self._calculate_retention_period(first_type)
+        row.cells[2].text = self._get_legal_basis(first_type)
+        row.cells[3].text = '48-hour warning + user confirmation'
+    
+        # Add additional rows for remaining data types
+        for data_type in data_types[1:]:
             row = retention_table.add_row()
             row.cells[0].text = DATA_TYPE_DISPLAY_NAMES.get(data_type, data_type.title())
             row.cells[1].text = self._calculate_retention_period(data_type)
             row.cells[2].text = self._get_legal_basis(data_type)
             row.cells[3].text = '48-hour warning + user confirmation'
-    
+
     def _add_document_metadata(self, doc: Document, doc_name: str, rule_ref: str):
         """Add metadata footer"""
         section = doc.sections[0]
