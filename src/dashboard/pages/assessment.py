@@ -19,6 +19,9 @@ from src.assessment.gap_analyzer import analyze_gaps
 # Demo data for quick testing
 DEMO_DATA = {
     'business_name': 'TechStartup Pvt Ltd',
+    'business_address': '4th Floor, Tower A, Tech Park\nOuter Ring Road, Whitefield\nBangalore, Karnataka 560066',
+    'business_email': 'contact@techstartup.in',
+    'business_phone': '+91-80-41234567',
     'entity_type': 'startup',
     'user_count': 15000,
     'processes_children_data': False,
@@ -67,7 +70,32 @@ def show():
             placeholder="e.g., TechCorp India Pvt Ltd"
         )
         
-        # Q2: Entity Type
+        # Q2: Business Address
+        business_address = st.text_area(
+            "2. Registered business address: *",
+            value=DEMO_DATA['business_address'] if st.session_state.get('demo_mode') else '',
+            placeholder="Floor/Unit, Building Name\nStreet, Area\nCity, State, PIN Code",
+            help="Full registered address as per incorporation documents",
+            height=100
+        )
+        
+        # Q3: Business Email
+        business_email = st.text_input(
+            "3. Business contact email: *",
+            value=DEMO_DATA['business_email'] if st.session_state.get('demo_mode') else '',
+            placeholder="contact@yourbusiness.com",
+            help="Official email address for DPDP compliance queries"
+        )
+        
+        # Q4: Business Phone
+        business_phone = st.text_input(
+            "4. Business contact phone: *",
+            value=DEMO_DATA['business_phone'] if st.session_state.get('demo_mode') else '',
+            placeholder="+91-80-12345678 or 9876543210",
+            help="Official contact number (include country/area code if applicable)"
+        )
+        
+        # Q5: Entity Type
         entity_options = ["", "startup", "smb", "ecommerce", "social_media", "fintech",
                          "healthcare", "edtech", "gaming", "other"]
         entity_index = 0
@@ -78,27 +106,26 @@ def show():
                 entity_index = 0
         
         entity_type = st.selectbox(
-            "2. Select your entity type: *",
+            "5. Select your entity type: *",
             options=entity_options,
             index=entity_index,
             help="Determines which specific requirements apply (e.g., Third Schedule thresholds)"
         )
         
-        # Q3: User Count
+        # Q6: User Count
         user_count = st.number_input(
-            "3. How many registered users do you have in India? *",
+            "6. How many registered users do you have in India? *",
             min_value=0,
             value=DEMO_DATA['user_count'] if st.session_state.get('demo_mode') else 0,
             step=1000,
             help="Third Schedule applies if: E-commerce/Social Media >=20M, Gaming >=5M"
-        )
-        
+        )        
         st.markdown("---")
         
         # Section 2: Data Processing
         st.markdown("### Data Processing")
         
-        # Q4: Children's Data
+        # Q7: Children's Data
         children_default = "Yes" if (st.session_state.get('demo_mode') and DEMO_DATA['processes_children_data']) else "No"
         processes_children_data = st.radio(
             "4. Do you process personal data of children (under 18)? *",
@@ -107,7 +134,7 @@ def show():
             help="WARNING: Children's data requires verifiable parent consent - Rs. 200 crore penalty"
         ) == "Yes"
         
-        # Q5: Cross-border
+        # Q8: Cross-border
         cross_border_default = "Yes" if (st.session_state.get('demo_mode') and DEMO_DATA['cross_border_transfers']) else "No"
         cross_border_transfers = st.radio(
             "5. Do you transfer personal data outside India? *",
@@ -116,7 +143,7 @@ def show():
             help="May face restrictions per Rule 15; monitor MEITY notifications"
         ) == "Yes"
         
-        # Q6: Data Types
+        # Q9: Data Types
         data_types = st.multiselect(
             "6. What types of personal data do you process? *",
             options=["name", "email", "phone", "address", "payment_info",
@@ -125,7 +152,7 @@ def show():
             help="Health/biometric = higher risk; select all that apply"
         )
         
-        # Q7: AI Usage
+        # Q10: AI Usage
         ai_options = ["No", "Yes", "Skip"]
         ai_default = 1 if (st.session_state.get('demo_mode') and DEMO_DATA.get('uses_ai')) else 0
         uses_ai_raw = st.radio(
@@ -136,7 +163,7 @@ def show():
         )
         uses_ai = True if uses_ai_raw == "Yes" else None if uses_ai_raw == "Skip" else False
         
-        # Q8: Revenue
+        # Q11: Revenue
         revenue_options = ["Skip", "< 1 crore", "1-10 crore", "10-50 crore", "50-100 crore", "> 100 crore"]
         revenue_default = 0
         if st.session_state.get('demo_mode') and DEMO_DATA.get('annual_revenue'):
@@ -158,7 +185,7 @@ def show():
         # Section 3: Current Compliance
         st.markdown("### Current Compliance Status")
         
-        # Q9: Processors
+        # Q12: Processors
         processors_default = "Yes" if (st.session_state.get('demo_mode') and DEMO_DATA['has_processors']) else "No"
         has_processors = st.radio(
             "9. Do you have contracts with Data Processors (vendors)? *",
@@ -167,7 +194,7 @@ def show():
             help="Rule 6(1)(f) requires security safeguards in contracts"
         ) == "Yes"
         
-        # Q10: Security Measures
+        # Q13: Security Measures
         current_security = st.multiselect(
             "10. What security measures do you currently have? *",
             options=["encryption", "access_control", "logging", "backups", "none"],
@@ -175,7 +202,7 @@ def show():
             help="WARNING: Rule 6 requires ALL FOUR: encryption, access control, logging, backups (Rs. 250 crore penalty)"
         )
         
-        # Q11: Breach Plan
+        # Q14: Breach Plan
         breach_default = "Yes" if (st.session_state.get('demo_mode') and DEMO_DATA['has_breach_plan']) else "No"
         has_breach_plan = st.radio(
             "11. Do you have a documented breach response plan? *",
@@ -184,7 +211,7 @@ def show():
             help="WARNING: Rule 7 requires 72-hour notification to Board - Rs. 200 crore penalty"
         ) == "Yes"
         
-        # Q12: Tracking
+        # Q15: Tracking
         tracking_default = "Yes" if (st.session_state.get('demo_mode') and DEMO_DATA['tracks_behavior']) else "No"
         tracks_behavior = st.radio(
             "12. Do you track user behavior or use analytics? *",
@@ -193,7 +220,7 @@ def show():
             help="WARNING: PROHIBITED for children under Rule 10 - Rs. 200 crore penalty"
         ) == "Yes"
         
-        # Q13: Advertising
+        # Q16: Advertising
         ads_default = "Yes" if (st.session_state.get('demo_mode') and DEMO_DATA['targeted_advertising']) else "No"
         targeted_advertising = st.radio(
             "13. Do you do targeted advertising? *",
@@ -202,7 +229,7 @@ def show():
             help="WARNING: PROHIBITED for children under Rule 10 - Rs. 200 crore penalty"
         ) == "Yes"
         
-        # Q14: Consent
+        # Q17: Consent
         consent_default = "Yes" if (st.session_state.get('demo_mode') and DEMO_DATA['has_consent_mechanism']) else "No"
         has_consent_mechanism = st.radio(
             "14. Do you have a consent mechanism for users? *",
@@ -211,7 +238,7 @@ def show():
             help="Rule 3 + Section 6 - Required for ALL businesses"
         ) == "Yes"
         
-        # Q15: Grievance
+        # Q18: Grievance
         grievance_default = "Yes" if (st.session_state.get('demo_mode') and DEMO_DATA['has_grievance_system']) else "No"
         has_grievance_system = st.radio(
             "15. Do you have a grievance redressal system? *",
@@ -237,23 +264,49 @@ def show():
                 del st.session_state['demo_mode']
             
             # Validation
+            import re
+            
             errors = []
+            
+            # Business name
             if not business_name or len(business_name) < 2:
-                errors.append("Business name is required")
+                errors.append("Business name is required (minimum 2 characters)")
+            
+            # Business address
+            if not business_address or len(business_address) < 10:
+                errors.append("Business address is required (minimum 10 characters)")
+            
+            # Business email
+            email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+            if not business_email or not re.match(email_pattern, business_email):
+                errors.append("Valid business email is required (e.g., contact@company.com)")
+            
+            # Business phone
+            phone_clean = business_phone.replace(' ', '').replace('-', '')
+            phone_pattern = r'^(\+91)?[6-9]\d{9}$|^\+91\d{2,4}\d{6,8}$'
+            if not business_phone or not re.match(phone_pattern, phone_clean):
+                errors.append("Valid Indian phone number required (10 digits or with +91)")
+            
+            # Entity type
             if not entity_type:
                 errors.append("Entity type is required")
+            
+            # User count
             if user_count is None:
                 errors.append("User count is required")
+            
+            # Data types
             if not data_types:
                 errors.append("At least one data type must be selected")
+            
+            # Security measures
             if not current_security or 'none' in current_security:
                 if 'none' not in current_security:
                     errors.append("At least one security measure must be selected")
             
             if errors:
                 st.error("Please fix the following errors:\n\n" + "\n".join(f"- {e}" for e in errors))
-                st.stop()
-            
+                st.stop()            
             # Check for illegal activity
             if processes_children_data and (tracks_behavior or targeted_advertising):
                 st.error("""
@@ -280,6 +333,9 @@ def show():
             # Prepare data
             answers = {
                 'business_name': business_name,
+                'business_address': business_address,
+                'business_email': business_email,
+                'business_phone': business_phone,
                 'entity_type': entity_type,
                 'user_count': user_count,
                 'processes_children_data': processes_children_data,

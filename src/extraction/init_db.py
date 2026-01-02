@@ -92,17 +92,18 @@ def init_database():
     # =========================================================================
     
     cursor.execute("""
-        CREATE TABLE IF NOT EXISTS business_profiles (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            business_name TEXT,
-            entity_type TEXT,
-            user_count INTEGER,
-            processes_children_data BOOLEAN DEFAULT 0,
-            cross_border_transfers BOOLEAN DEFAULT 0,
-            assessment_score REAL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
+    CREATE TABLE IF NOT EXISTS business_profiles (
+        business_id TEXT PRIMARY KEY,
+        business_name TEXT NOT NULL,
+        business_address TEXT,
+        business_email TEXT,
+        business_phone TEXT,
+        entity_type TEXT NOT NULL,
+        user_count INTEGER NOT NULL,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        extended_data TEXT,
+        assessment_score REAL
+    )
     """)
     print("✓ Created table: business_profiles")
     

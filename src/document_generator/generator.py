@@ -62,6 +62,36 @@ class DocumentGenerator:
                 f"Templates directory not found: {self.templates_dir}"
             )
     
+    def _safe_get(self, key: str, default: str = '[NOT PROVIDED]') -> str:
+        """
+        Safely get value from profile with fallback for contact fields.
+        
+        Args:
+            key: Profile key to retrieve
+            default: Default value if key not found
+            
+        Returns:
+            Value from profile or helpful placeholder
+        """
+        value = self.profile.get(key)
+        
+        # Check extended_data if not in top level
+        if value is None and 'extended_data' in self.profile:
+            value = self.profile['extended_data'].get(key)
+        
+        # Provide helpful placeholders for missing contact info
+        if value is None or value == '':
+            if key == 'business_address':
+                return '[INSERT REGISTERED BUSINESS ADDRESS]'
+            elif key == 'business_email':
+                return '[INSERT BUSINESS EMAIL]'
+            elif key == 'business_phone':
+                return '[INSERT BUSINESS PHONE]'
+            else:
+                return default
+        
+        return str(value)
+    
     def generate_privacy_notice(self) -> Document:
         """
         Generate Privacy Notice per Rule 3.
@@ -79,15 +109,15 @@ class DocumentGenerator:
         doc = Document(str(template_path))
         
         replacements = {
-            '{{BUSINESS_NAME}}': self._get_safe_value('business_name'),
-            '{{ADDRESS}}': self._get_safe_value('address', '[INSERT BUSINESS ADDRESS]'),
-            '{{EMAIL}}': self._get_safe_value('email', '[INSERT CONTACT EMAIL]'),
-            '{{PHONE}}': self._get_safe_value('phone', '[INSERT CONTACT PHONE]'),
+            '{{BUSINESS_NAME}}': self._safe_get('business_name'),
+            '{{ADDRESS}}': self._safe_get('business_address'),
+            '{{EMAIL}}': self._safe_get('business_email'),
+            '{{PHONE}}': self._safe_get('business_phone'),
             '{{DATA_TYPES}}': self._format_data_types_readable(),
             '{{PURPOSES}}': self._format_purposes(),
             '{{DATE}}': datetime.now().strftime("%B %d, %Y"),
             '{{WITHDRAWAL_METHOD}}': self._format_withdrawal_method(),
-            '{{GRIEVANCE_CONTACT}}': self._get_safe_value('email', '[INSERT GRIEVANCE EMAIL]')
+            '{{GRIEVANCE_CONTACT}}': self._safe_get('business_email')
         }
         
         self._replace_all_placeholders(doc, replacements)
@@ -113,7 +143,7 @@ class DocumentGenerator:
         doc = Document(str(template_path))
         
         replacements = {
-            '{{BUSINESS_NAME}}': self._get_safe_value('business_name'),
+            '{{BUSINESS_NAME}}': self._safe_get('business_name'),
             '{{DATA_COLLECTED}}': self._format_data_types_detailed(),
             '{{PURPOSES}}': self._format_purposes(),
             '{{RETENTION_PERIOD}}': self._format_retention_summary(),
@@ -144,9 +174,9 @@ class DocumentGenerator:
         doc = Document(str(template_path))
         
         replacements = {
-            '{{BUSINESS_NAME}}': self._get_safe_value('business_name'),
-            '{{GRIEVANCE_EMAIL}}': self._get_safe_value('email', '[INSERT GRIEVANCE EMAIL]'),
-            '{{GRIEVANCE_PHONE}}': self._get_safe_value('phone', '[INSERT GRIEVANCE PHONE]'),
+            '{{BUSINESS_NAME}}': self._safe_get('business_name'),
+            '{{GRIEVANCE_EMAIL}}': self._safe_get('business_email'),
+            '{{GRIEVANCE_PHONE}}': self._safe_get('business_phone'),
             '{{DATE}}': datetime.now().strftime("%B %d, %Y")
         }
         
@@ -176,7 +206,7 @@ class DocumentGenerator:
         self._populate_retention_table(doc)
         
         replacements = {
-            '{{BUSINESS_NAME}}': self._get_safe_value('business_name'),
+            '{{BUSINESS_NAME}}': self._safe_get('business_name'),
             '{{DATE}}': datetime.now().strftime("%B %d, %Y")
         }
         self._replace_all_placeholders(doc, replacements)
@@ -204,10 +234,10 @@ class DocumentGenerator:
         doc_dpb = Document(str(template_dpb))
         
         replacements_dpb = {
-            '{{BUSINESS_NAME}}': self._get_safe_value('business_name'),
-            '{{ADDRESS}}': self._get_safe_value('address', '[INSERT]'),
-            '{{EMAIL}}': self._get_safe_value('email', '[INSERT]'),
-            '{{PHONE}}': self._get_safe_value('phone', '[INSERT]'),
+            '{{BUSINESS_NAME}}': self._safe_get('business_name'),
+            '{{ADDRESS}}': self._safe_get('business_address'),
+            '{{EMAIL}}': self._safe_get('business_email'),
+            '{{PHONE}}': self._safe_get('business_phone'),
             '{{DATA_CATEGORIES}}': self._format_data_types_readable(),
             '{{BREACH_DATE}}': '[INSERT: Date breach discovered - DD/MM/YYYY]',
             '{{BREACH_NATURE}}': '[INSERT: Unauthorized access / Data leak / System compromise]',
@@ -228,8 +258,8 @@ class DocumentGenerator:
         doc_users = Document(str(template_users))
         
         replacements_users = {
-            '{{BUSINESS_NAME}}': self._get_safe_value('business_name'),
-            '{{GRIEVANCE_CONTACT}}': self._get_safe_value('email', '[INSERT]'),
+            '{{BUSINESS_NAME}}': self._safe_get('business_name'),
+            '{{GRIEVANCE_CONTACT}}': self._safe_get('business_email'),
             '{{BREACH_DESCRIPTION}}': '[INSERT: Simple language - "Someone accessed our database without permission"]',
             '{{YOUR_DATA}}': '[INSERT: "Your email address and phone number may have been accessed"]',
             '{{WHAT_WE_DID}}': '[INSERT: "We immediately secured the system and reset all passwords"]',
@@ -262,7 +292,7 @@ class DocumentGenerator:
         doc = Document(str(template_path))
         
         replacements = {
-            '{{BUSINESS_NAME}}': self._get_safe_value('business_name'),
+            '{{BUSINESS_NAME}}': self._safe_get('business_name'),
             '{{SERVICE_DESCRIPTION}}': '[INSERT: Describe your service/app/platform]',
             '{{DATA_COLLECTED}}': self._format_data_types_readable(),
             '{{PURPOSES}}': self._format_purposes(),
@@ -434,20 +464,11 @@ class DocumentGenerator:
     # ========================================================================
     
     def _get_safe_value(self, key: str, default: str = '[MANUAL ENTRY REQUIRED]') -> str:
-        """Safely extract value with fallback"""
-        value = self.profile.get(key)
-        
-        if value is None:
-            return default
-        
-        if isinstance(value, str):
-            cleaned = sanitize_input(value.strip())
-            return cleaned if cleaned else default
-        
-        if isinstance(value, list) and not value:
-            return default
-        
-        return str(value)
+        """
+        DEPRECATED: Use _safe_get() instead.
+        Safely extract value with fallback.
+        """
+        return self._safe_get(key, default)
     
     def _format_data_types_readable(self) -> str:
         """Convert coded data types to readable format"""
@@ -634,41 +655,38 @@ Penalty: Rs. 50 crore"""
                 # Check if this table has the marker in row 2
                 if len(table.rows) > 1:
                     first_cell_text = table.rows[1].cells[0].text.strip()
-                if '{{RETENTION_TABLE}}' in first_cell_text:
-                    retention_table = table
-                    break
-    
+                    if '{{RETENTION_TABLE}}' in first_cell_text:
+                        retention_table = table
+                        break
+        
         if not retention_table:
             raise DocumentGenerationError(
-            "Retention schedule template missing {{RETENTION_TABLE}} marker in table"
-        )
-    
+                "Retention schedule template missing {{RETENTION_TABLE}} marker in table"
+            )
+        
         # Clear the marker from row 2, cell 1
         retention_table.rows[1].cells[0].text = ''
-    
-        # Remove the marker row entirely (we'll add data rows fresh)
-        # Note: Can't delete row easily in python-docx, so we'll just overwrite it
-    
+        
         # Get data types
         data_types = self.profile.get('data_types', [])
-    
+        
         if not data_types:
-        # If no data types, add placeholder row
+            # If no data types, add placeholder row
             row = retention_table.rows[1]
             row.cells[0].text = '[NO DATA TYPES SPECIFIED]'
             row.cells[1].text = 'N/A'
             row.cells[2].text = 'N/A'
             row.cells[3].text = 'N/A'
             return
-    
-    # Populate first data type in existing row 2
+        
+        # Populate first data type in existing row 2
         first_type = data_types[0]
         row = retention_table.rows[1]
         row.cells[0].text = DATA_TYPE_DISPLAY_NAMES.get(first_type, first_type.title())
         row.cells[1].text = self._calculate_retention_period(first_type)
         row.cells[2].text = self._get_legal_basis(first_type)
         row.cells[3].text = '48-hour warning + user confirmation'
-    
+        
         # Add additional rows for remaining data types
         for data_type in data_types[1:]:
             row = retention_table.add_row()
@@ -686,7 +704,7 @@ Penalty: Rs. 50 crore"""
             paragraph.clear()
         
         metadata = footer.paragraphs[0] if footer.paragraphs else footer.add_paragraph()
-        metadata.text = f"""Generated by DPDPA Compliance Dashboard v1.0.2 | {datetime.now().strftime('%B %d, %Y at %I:%M %p')}
+        metadata.text = f"""Generated by DPDPA Compliance Dashboard v1.0.3 | {datetime.now().strftime('%B %d, %Y at %I:%M %p')}
 Document: {doc_name} ({rule_ref}) | Based on: DPDP Act 2023 + Rules 2025 (Nov 13, 2025)
 Business: {self.profile.get('business_name', 'Unknown')} | Document ID: {secrets.token_hex(8)}
 

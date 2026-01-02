@@ -9,6 +9,7 @@ Usage:
 
 import sqlite3
 import json
+import uuid
 from datetime import datetime
 from pathlib import Path
 import sys
@@ -21,23 +22,36 @@ sys.path.insert(0, str(project_root))
 from config.config import DB_PATH
 
 
-def create_business_profile(answers: Dict[str, Any]) -> int:
+def get_db_connection():
+    """Get database connection"""
+    return sqlite3.connect(DB_PATH)
+
+
+def create_business_profile(answers: Dict[str, Any]) -> str:
     """
     Save business profile to database
     
     Args:
-        answers: Dictionary from questionnaire.run_questionnaire()
+        answers: Dictionary from questionnaire including:
+                - business_name, business_address, business_email, business_phone
+                - entity_type, user_count, etc.
         
     Returns:
-        business_profile_id: Primary key of inserted record
+        business_id: UUID string of inserted record
     """
     
-    conn = sqlite3.connect(DB_PATH)
+    conn = get_db_connection()
     cursor = conn.cursor()
     
     try:
+        # Generate unique ID
+        business_id = str(uuid.uuid4())
+        
         # Extract core fields (match business_profiles schema)
         business_name = answers.get('business_name', 'Unknown')
+        business_address = answers.get('business_address', '')
+        business_email = answers.get('business_email', '')
+        business_phone = answers.get('business_phone', '')
         entity_type = answers.get('entity_type', 'other')
         user_count = answers.get('user_count', 0)
         processes_children_data = answers.get('processes_children_data', False)
@@ -54,77 +68,64 @@ def create_business_profile(answers: Dict[str, Any]) -> int:
             'tracks_behavior': answers.get('tracks_behavior', False),
             'targeted_advertising': answers.get('targeted_advertising', False),
             'has_consent_mechanism': answers.get('has_consent_mechanism', False),
-            'has_grievance_system': answers.get('has_grievance_system', False)
+            'has_grievance_system': answers.get('has_grievance_system', False),
+            'processes_children_data': processes_children_data,
+            'cross_border_transfers': cross_border_transfers
         }
         
-        # Check if business_profiles table has extended_data column
+        # Check if business_profiles table has the new contact columns
         cursor.execute("PRAGMA table_info(business_profiles)")
         columns = [col[1] for col in cursor.fetchall()]
         
-        if 'extended_data' in columns:
-            # Insert with extended_data column
+        if 'business_address' in columns:
+            # New schema with contact fields
             cursor.execute("""
                 INSERT INTO business_profiles (
+                    business_id,
                     business_name,
+                    business_address,
+                    business_email,
+                    business_phone,
                     entity_type,
                     user_count,
-                    processes_children_data,
-                    cross_border_transfers,
-                    assessment_score,
                     extended_data,
-                    created_at,
-                    last_updated
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    assessment_score,
+                    created_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
+                business_id,
                 business_name,
+                business_address,
+                business_email,
+                business_phone,
                 entity_type,
                 user_count,
-                1 if processes_children_data else 0,
-                1 if cross_border_transfers else 0,
-                0.0,  # Initial score
                 json.dumps(extended_data),
-                datetime.now().isoformat(),
+                0.0,  # Initial score
                 datetime.now().isoformat()
             ))
         else:
-            # Add extended_data column first
-            try:
-                cursor.execute("""
-                    ALTER TABLE business_profiles
-                    ADD COLUMN extended_data TEXT
-                """)
-                conn.commit()
-                print("✓ Added extended_data column to business_profiles")
-            except sqlite3.OperationalError:
-                # Column already exists, that's fine
-                pass
-            
-            # Now insert with extended_data
+            # Old schema without contact fields
             cursor.execute("""
                 INSERT INTO business_profiles (
+                    business_id,
                     business_name,
                     entity_type,
                     user_count,
-                    processes_children_data,
-                    cross_border_transfers,
-                    assessment_score,
                     extended_data,
-                    created_at,
-                    last_updated
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    assessment_score,
+                    created_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?)
             """, (
+                business_id,
                 business_name,
                 entity_type,
                 user_count,
-                1 if processes_children_data else 0,
-                1 if cross_border_transfers else 0,
-                0.0,
                 json.dumps(extended_data),
-                datetime.now().isoformat(),
+                0.0,
                 datetime.now().isoformat()
             ))
         
-        business_id = cursor.lastrowid
         conn.commit()
         
         print(f"✓ Business profile created (ID: {business_id})")
@@ -146,79 +147,99 @@ def create_business_profile(answers: Dict[str, Any]) -> int:
         conn.close()
 
 
-def get_business_profile(business_id: int) -> Dict[str, Any]:
+def get_business_profile(business_id: str) -> Dict[str, Any]:
     """
     Retrieve business profile from database
     
     Args:
-        business_id: Primary key
+        business_id: UUID string
         
     Returns:
-        Dictionary with business profile data
+        Dictionary with business profile data including contact fields
     """
     
-    conn = sqlite3.connect(DB_PATH)
+    conn = get_db_connection()
     cursor = conn.cursor()
     
     try:
-        cursor.execute("""
-            SELECT 
-                id,
-                business_name,
-                entity_type,
-                user_count,
-                processes_children_data,
-                cross_border_transfers,
-                assessment_score,
-                created_at,
-                last_updated
-            FROM business_profiles
-            WHERE id = ?
-        """, (business_id,))
+        # Check which columns exist
+        cursor.execute("PRAGMA table_info(business_profiles)")
+        columns = [col[1] for col in cursor.fetchall()]
+        
+        has_contact_fields = 'business_address' in columns
+        
+        if has_contact_fields:
+            # New schema with contact fields
+            cursor.execute("""
+                SELECT 
+                    business_id,
+                    business_name,
+                    business_address,
+                    business_email,
+                    business_phone,
+                    entity_type,
+                    user_count,
+                    created_at,
+                    extended_data,
+                    assessment_score
+                FROM business_profiles
+                WHERE business_id = ?
+            """, (business_id,))
+        else:
+            # Old schema without contact fields
+            cursor.execute("""
+                SELECT 
+                    business_id,
+                    business_name,
+                    entity_type,
+                    user_count,
+                    created_at,
+                    extended_data,
+                    assessment_score
+                FROM business_profiles
+                WHERE business_id = ?
+            """, (business_id,))
         
         row = cursor.fetchone()
         
         if not row:
             raise ValueError(f"Business profile {business_id} not found")
         
-        profile = {
-            'id': row[0],
-            'business_name': row[1],
-            'entity_type': row[2],
-            'user_count': row[3],
-            'processes_children_data': bool(row[4]),
-            'cross_border_transfers': bool(row[5]),
-            'assessment_score': row[6],
-            'created_at': row[7],
-            'last_updated': row[8]
-        }
-        
-        # Try to get extended data
-        cursor.execute("PRAGMA table_info(business_profiles)")
-        columns = [col[1] for col in cursor.fetchall()]
-        
-        if 'extended_data' in columns:
-            cursor.execute("""
-                SELECT extended_data
-                FROM business_profiles
-                WHERE id = ?
-            """, (business_id,))
-            extended_json = cursor.fetchone()[0]
-            if extended_json:
-                profile['extended_data'] = json.loads(extended_json)
+        if has_contact_fields:
+            profile = {
+                'id': row[0],
+                'business_name': row[1],
+                'business_address': row[2],
+                'business_email': row[3],
+                'business_phone': row[4],
+                'entity_type': row[5],
+                'user_count': row[6],
+                'created_at': row[7],
+                'assessment_score': row[9]
+            }
+            extended_json = row[8]
         else:
-            # Get from attributes table
-            cursor.execute("""
-                SELECT attribute_name, attribute_value
-                FROM business_profile_attributes
-                WHERE business_profile_id = ?
-            """, (business_id,))
-            
-            extended_data = {}
-            for attr_name, attr_value in cursor.fetchall():
-                extended_data[attr_name] = json.loads(attr_value)
-            
-            profile['extended_data'] = extended_data
+            profile = {
+                'id': row[0],
+                'business_name': row[1],
+                'entity_type': row[2],
+                'user_count': row[3],
+                'created_at': row[4],
+                'assessment_score': row[6]
+            }
+            extended_json = row[5]
+        
+        # Parse extended data
+        if extended_json:
+            try:
+                extended = json.loads(extended_json)
+                profile['extended_data'] = extended
+                # Also merge extended data into top level for convenience
+                profile.update(extended)
+            except json.JSONDecodeError:
+                profile['extended_data'] = {}
+        else:
+            profile['extended_data'] = {}
         
         return profile
         
@@ -229,25 +250,24 @@ def get_business_profile(business_id: int) -> Dict[str, Any]:
         conn.close()
 
 
-def update_assessment_score(business_id: int, score: float) -> None:
+def update_assessment_score(business_id: str, score: float) -> None:
     """
     Update compliance assessment score
     
     Args:
-        business_id: Primary key
+        business_id: UUID string
         score: Compliance score (0-100)
     """
     
-    conn = sqlite3.connect(DB_PATH)
+    conn = get_db_connection()
     cursor = conn.cursor()
     
     try:
         cursor.execute("""
             UPDATE business_profiles
-            SET assessment_score = ?,
-                last_updated = ?
-            WHERE id = ?
-        """, (score, datetime.now().isoformat(), business_id))
+            SET assessment_score = ?
+            WHERE business_id = ?
+        """, (score, business_id))
         
         conn.commit()
         print(f"✓ Updated assessment score to {score:.1f}%")
@@ -268,21 +288,40 @@ def list_business_profiles() -> list:
         List of dictionaries with profile summaries
     """
     
-    conn = sqlite3.connect(DB_PATH)
+    conn = get_db_connection()
     cursor = conn.cursor()
     
     try:
-        cursor.execute("""
-            SELECT 
-                id,
-                business_name,
-                entity_type,
-                user_count,
-                assessment_score,
-                created_at
-            FROM business_profiles
-            ORDER BY created_at DESC
-        """)
+        # Check which columns exist
+        cursor.execute("PRAGMA table_info(business_profiles)")
+        columns = [col[1] for col in cursor.fetchall()]
+        
+        has_contact_fields = 'business_address' in columns
+        
+        if has_contact_fields:
+            cursor.execute("""
+                SELECT 
+                    business_id,
+                    business_name,
+                    entity_type,
+                    user_count,
+                    assessment_score,
+                    created_at
+                FROM business_profiles
+                ORDER BY created_at DESC
+            """)
+        else:
+            cursor.execute("""
+                SELECT 
+                    business_id,
+                    business_name,
+                    entity_type,
+                    user_count,
+                    assessment_score,
+                    created_at
+                FROM business_profiles
+                ORDER BY created_at DESC
+            """)
         
         profiles = []
         for row in cursor.fetchall():
@@ -310,7 +349,7 @@ def ensure_extended_data_support():
     Also create business_profile_attributes table as fallback
     """
     
-    conn = sqlite3.connect(DB_PATH)
+    conn = get_db_connection()
     cursor = conn.cursor()
     
     try:
@@ -331,10 +370,10 @@ def ensure_extended_data_support():
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS business_profile_attributes (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                business_profile_id INTEGER NOT NULL,
+                business_profile_id TEXT NOT NULL,
                 attribute_name TEXT NOT NULL,
                 attribute_value TEXT,
-                FOREIGN KEY (business_profile_id) REFERENCES business_profiles(id),
+                FOREIGN KEY (business_profile_id) REFERENCES business_profiles(business_id),
                 UNIQUE(business_profile_id, attribute_name)
             )
         """)
@@ -362,6 +401,9 @@ if __name__ == "__main__":
     # Create sample profile
     sample_answers = {
         'business_name': 'Test Corp',
+        'business_address': '123 Test Street, Test City, Test State 123456',
+        'business_email': 'test@testcorp.com',
+        'business_phone': '+91-80-12345678',
         'entity_type': 'startup',
         'user_count': 50000,
         'processes_children_data': False,
@@ -386,6 +428,9 @@ if __name__ == "__main__":
     print("Retrieving business profile...")
     profile = get_business_profile(business_id)
     print(f"✓ Retrieved profile: {profile['business_name']}")
+    print(f"  Address: {profile.get('business_address', 'N/A')}")
+    print(f"  Email: {profile.get('business_email', 'N/A')}")
+    print(f"  Phone: {profile.get('business_phone', 'N/A')}")
     print(f"  Type: {profile['entity_type']}")
     print(f"  Users: {profile['user_count']:,}")
     if 'extended_data' in profile:
@@ -396,7 +441,7 @@ if __name__ == "__main__":
     print("All business profiles:")
     profiles = list_business_profiles()
     for p in profiles:
-        print(f"  {p['id']:3d}. {p['business_name']:30s} ({p['entity_type']}) - {p['assessment_score']:.1f}%")
+        print(f"  {p['business_name']:30s} ({p['entity_type']}) - {p.get('assessment_score', 0):.1f}%")
     print()
     
     print("="*70)
